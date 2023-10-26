@@ -60,7 +60,7 @@ namespace E_VotingSystem.Controllers
                     {
                         return View("ErrorMobile");
                     }
-                    //a
+                   
 
                     DalInsertVoting l_DalInsertVoting = new DalInsertVoting();
                     int lUserCount = l_DalInsertVoting.FncGetRecordCountForUser(l_ModLoggedInUser.PKGUID, l_ConnectionString);
