@@ -110,6 +110,7 @@ section {
     text-decoration: underline;
     color: inherit; /* Inherit text color */
     padding: 0;
+    font-weight: bold;
 }
 
 ol,
@@ -202,7 +203,7 @@ img {
 body {
     font-family: 'Source Sans Pro', sans-serif;
     font-size: 100%;
-    background: url(/images/vote.webp) no-repeat center;
+    background: url(/images/background.webp) no-repeat center;
     background-size: cover;
     -webkit-background-size: cover;
     -moz-background-size: cover;
@@ -252,6 +253,7 @@ h1 {
     margin-bottom: 15px;
     text-transform: capitalize;
     letter-spacing: 2px;
+    font-weight: bold;
 }
 
 .agile-field-txt {
@@ -269,7 +271,7 @@ h1 {
 .w3ls-login input[type="text"],
 .w3ls-login input[type="password"] {
     width: 100%;
-    color: #fff;
+    color: black;
     outline: none;
     font-size: 15px;
     letter-spacing: 2px;
@@ -286,7 +288,7 @@ h1 {
 
     .w3ls-login input[type="text"]:focus,
     .w3ls-login input[type="password"]:focus {
-        border-color: #fff;
+        border-color: black;
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     }
 
@@ -304,6 +306,7 @@ label.check {
 .agile_label {
     float: left;
     margin: 20px 0 0px 10px;
+    font-weight:bold;
 }
 
 .agile-right {
@@ -542,7 +545,7 @@ input:checked + .slider:before {
 }
 
     .copy-wthree p {
-        color: #ccc;
+        color: black;
         font-size: 16px;
         letter-spacing: 1px;
         line-height: 1.8;
@@ -550,7 +553,7 @@ input:checked + .slider:before {
     }
 
         .copy-wthree p a {
-            color: #000;
+            color: black;
             transition: 0.5s all ease;
             -webkit-transition: 0.5s all ease;
             -moz-transition: 0.5s all ease;
@@ -559,7 +562,7 @@ input:checked + .slider:before {
         }
 
             .copy-wthree p a:hover {
-                color: #000;
+                color: blue;
             }
 
 /* Responsive Styles */

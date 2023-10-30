@@ -1,34 +1,43 @@
-﻿@model List<ModCandidateVoteInfo>
+﻿@model ModCanidateResultDataSet
+
 @{
-    ViewData["Title"] = "Candidate Vote Info";
-    Layout = null;
+    ModCanidateResultDataSet l_ModCanidateResultDataSet = new ModCanidateResultDataSet();
+    l_ModCanidateResultDataSet = Model;
+
+    List<ModRptCandidateResult> l_ListModRptCandidateResult_Local = new List<ModRptCandidateResult>();
+    l_ListModRptCandidateResult_Local = l_ModCanidateResultDataSet.ListModRptCandidateResult_Local;
+
+    List<ModRptCandidateResult> l_ListModRptCandidateResult_Executive = new List<ModRptCandidateResult>();
+    l_ListModRptCandidateResult_Executive = l_ModCanidateResultDataSet.ListModRptCandidateResult_Executive;
 }
+
 <style>
     /* Custom styles for the table */
     .table {
         width: 100%;
         max-width: 800px; /* Set a maximum width for the table */
         margin: 0 auto; /* Center the table horizontally */
+        border-collapse: collapse; /* Collapse table borders */
     }
+
+        .table th, .table td {
+            padding: 10px; /* Cell padding */
+            text-align: left; /* Cell text alignment */
+        }
 
         .table th {
             background-color: black; /* Header background color */
             color: white; /* Header text color */
-            text-align: left; /* Header text alignment */
         }
 
-        .table th, .table td {
-            padding: 10px; /* Cell padding */
+        .table tbody tr:nth-child(odd) {
+            background-color: #f2f2f2; /* Alternate row background color */
         }
 
-    .table-striped tbody tr:nth-child(odd) {
-        background-color: #f2f2f2; /* Alternate row background color */
-    }
-
-    .table-hover tbody tr:hover {
-        background-color: #e0e0e0; /* Row background color on hover */
-        cursor: pointer; /* Change cursor to pointer on hover */
-    }
+        .table tbody tr:hover {
+            background-color: #e0e0e0; /* Row background color on hover */
+            cursor: pointer; /* Change cursor to pointer on hover */
+        }
 
     /* Custom style for the h1 heading */
     h1 {
@@ -43,9 +52,9 @@
         font-style: italic;
         color: #888;
     }
-
 </style>
-<h1>Candidate Vote Info</h1>
+
+<h1>Executive Candidate Vote Info</h1>
 
 <table class="table table-bordered table-striped table-hover">
     <thead>
@@ -57,13 +66,42 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (ModCandidateVoteInfo candidate in Model)
+        @foreach (ModRptCandidateResult l_ModRptCandidateResult in l_ListModRptCandidateResult_Executive)
         {
             <tr>
-                <td>@candidate.AutoID</td>
-                <td>@candidate.CandidateName</td>
-                <td>@candidate.MemberShipNo</td>
-                <td>@candidate.VoteCount</td>
+                <td>@l_ModRptCandidateResult.CandidateID</td>
+                <td>@l_ModRptCandidateResult.CandidateName</td>
+                <td>@l_ModRptCandidateResult.Region</td>
+                <td>@l_ModRptCandidateResult.VoteCount</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+<h3></h3>
+<br><br/>
+
+<h1>Local Candidate Vote Info</h1>
+
+<table class="table table-bordered table-striped table-hover">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Membership No</th>
+            <th>Vote Count</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (ModRptCandidateResult l_ModRptCandidateResult in l_ListModRptCandidateResult_Local)
+        {
+            <tr>
+                <td>@l_ModRptCandidateResult.CandidateID</td>
+                <td>@l_ModRptCandidateResult.CandidateName</td>
+                <td>@l_ModRptCandidateResult.Region</td>
+                <td>@l_ModRptCandidateResult.VoteCount</td>
             </tr>
         }
     </tbody>

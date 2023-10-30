@@ -1,90 +1,90 @@
 ﻿using System.Data.SqlClient;
-using E_VotingSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace E_VotingSystem.Controllers
+public class AccountController : Controller
 {
-    public class AccountController : Controller
+    [HttpGet]
+    public ActionResult Index()
     {
-        [HttpGet]
-        public IActionResult Index()
-        {
-            return View();
-        }
+        return View();
+    }
 
-        [HttpPost]
-        public ActionResult Verify(ModUser l_ModUser)
+    [HttpPost]
+    public ActionResult Login(ModMember l_ModMember)
+    {
+        try
         {
-            try
+            CmConnectionHelper l_CmConnectionHelper = new CmConnectionHelper();
+            string l_ConnectionString = l_CmConnectionHelper.Fnc_GetConnectionString();
+
+            using (SqlConnection l_SqlConnection_Member = new SqlConnection(l_ConnectionString))
             {
-                CmConnectionHelper l_CmConnectionHelper = new CmConnectionHelper();
-                string l_ConnectionString = l_CmConnectionHelper.FncGetConnectionString();
+                l_SqlConnection_Member.Open();
+                SqlCommand l_SqlCommand_Member = new SqlCommand();
+                l_SqlCommand_Member.Connection = l_SqlConnection_Member;
+                l_SqlCommand_Member.Parameters.AddWithValue("@mMemberID", l_ModMember.MemberID?.Trim());
+                l_SqlCommand_Member.Parameters.AddWithValue("@mPassword", l_ModMember.Password?.Trim());
+                l_SqlCommand_Member.CommandText = " SELECT * FROM Vw_TBU_Member WHERE MemberID = @mMemberID AND Password = @mPassword ";
 
-                using (SqlConnection l_SqlConnection = new SqlConnection(l_ConnectionString))
+                ModMember l_ModLoggedInMember = new ModMember();
+                SqlDataReader l_SqlDataReader_Member = l_SqlCommand_Member.ExecuteReader();
+                if (l_SqlDataReader_Member.Read() == true)
                 {
-                    l_SqlConnection.Open();
-                    SqlCommand l_SqlCommand = new SqlCommand();
-                    l_SqlCommand.Connection = l_SqlConnection;
-                    l_SqlCommand.Parameters.AddWithValue("@MembershipID", l_ModUser.MembershipID);
-                    l_SqlCommand.Parameters.AddWithValue("@Password", l_ModUser.Password);
-                    l_SqlCommand.CommandText = " SELECT * FROM Vw_TBU_Members WHERE MembershipID = @MembershipID AND Password = @Password ";
+                    l_ModLoggedInMember.PKGUID = (Guid)l_SqlDataReader_Member["PKGUID"];
+                    l_ModLoggedInMember.MemberID = (string)l_SqlDataReader_Member["MemberID"];
+                    l_ModLoggedInMember.Password = (string)l_SqlDataReader_Member["Password"];
+                    l_ModLoggedInMember.MemberName = (string)l_SqlDataReader_Member["MemberName"];
+                    l_ModLoggedInMember.Region = (string)l_SqlDataReader_Member["Region"];
+                    l_ModLoggedInMember.Email = (string)l_SqlDataReader_Member["Email"];
+                    l_ModLoggedInMember.ContactNo = (string)l_SqlDataReader_Member["ContactNo"];
+                    l_ModLoggedInMember.Mobile = (string)l_SqlDataReader_Member["Mobile"];
+                    l_ModLoggedInMember.Address = (string)l_SqlDataReader_Member["Address"];
+                    l_ModLoggedInMember.LcCouncilSeats = (int)l_SqlDataReader_Member["LcCouncilSeats"];
+                    l_ModLoggedInMember.ExCouncilSeats = (int)l_SqlDataReader_Member["ExCouncilSeats"];
+                }
+                else
+                {
+                    return View("ErrorLogin");
+                }
 
-                    ModUser l_ModLoggedInUser = new ModUser();
-                    SqlDataReader l_SqlDataReader = l_SqlCommand.ExecuteReader();
-                    if (l_SqlDataReader.Read())
+                if (string.IsNullOrWhiteSpace(l_ModLoggedInMember.Mobile))
+                {
+                    return View("ErrorMobile");
+                }
+
+                using (SqlConnection l_SqlConnection_Vote = new SqlConnection(l_ConnectionString))
+                {
+                    l_SqlConnection_Vote.Open();
+                    SqlCommand l_SqlCommand_Vote = new SqlCommand();
+                    l_SqlCommand_Vote.Connection = l_SqlConnection_Vote;
+                    l_SqlCommand_Vote.Parameters.AddWithValue("@mMemberDID", l_ModLoggedInMember.PKGUID);
+                    l_SqlCommand_Vote.CommandText = " SELECT COUNT(*) AS VoteCount FROM TBU_Vote WHERE MemberDID = @mMemberDID; ";
+
+                    object l_Result = l_SqlCommand_Vote.ExecuteScalar();
+                    if (l_Result == DBNull.Value)
                     {
-                        l_ModLoggedInUser.ImageLocation = l_SqlDataReader["ImageLocation"] as string;
-                        l_ModLoggedInUser.ExRegionSeats = l_SqlDataReader["ExCouncilSeats"] as string;
-                        l_ModLoggedInUser.LcRegionSeats = l_SqlDataReader["LcCouncilSeats"] as string;
-                        l_ModLoggedInUser.PKGUID = l_SqlDataReader["PKGUID"] as string;
-                        l_ModLoggedInUser.MembershipID = l_SqlDataReader["MembershipID"] as string;
-                        l_ModLoggedInUser.MemberName = l_SqlDataReader["MemberName"] as string;
-                        l_ModLoggedInUser.Address1 = l_SqlDataReader["Address1"] as string;
-                        l_ModLoggedInUser.Address2 = l_SqlDataReader["Address2"] as string;
-                        l_ModLoggedInUser.Email = l_SqlDataReader["Email"] as string;
-                        l_ModLoggedInUser.FounderMembers = l_SqlDataReader["FounderMembers"] as string;
-                        l_ModLoggedInUser.LifeAndAnnualMembers = l_SqlDataReader["LifeAndAnnualMembers"] as string;
-                        l_ModLoggedInUser.CompanysName = l_SqlDataReader["CompanysName"] as string;
-                        l_ModLoggedInUser.Region = l_SqlDataReader["Region"] as string;
-                        l_ModLoggedInUser.Password = l_ModUser.Password;
-                        l_ModLoggedInUser.Mobile = l_SqlDataReader["Mobile"] as string;
-                        l_ModLoggedInUser.ContactNo = l_SqlDataReader["ContactNo"] as int?;
-                    }
-
-                    if (string.IsNullOrWhiteSpace(l_ModLoggedInUser.Mobile))
-                    {
-                        return View("ErrorMobile");
-                    }
-
-                    if (string.IsNullOrWhiteSpace(l_ModLoggedInUser.PKGUID))
-                    {
-                        return View("ErrorMobile");
-                    }
-                   
-
-                    DalInsertVoting l_DalInsertVoting = new DalInsertVoting();
-                    int lUserCount = l_DalInsertVoting.FncGetRecordCountForUser(l_ModLoggedInUser.PKGUID, l_ConnectionString);
-
-                    int l_ExSeatsCount = int.Parse(l_ModLoggedInUser.ExRegionSeats ?? "0");
-                    int l_LcSeatsCount = int.Parse(l_ModLoggedInUser.LcRegionSeats ?? "0");
-                    int TotalVotes = l_ExSeatsCount + l_LcSeatsCount;
-
-                    if (lUserCount > TotalVotes)
-                    {
-                        TempData["ErrorMessage"] = l_ModLoggedInUser.MemberName;
+                        TempData["ErrorMessage"] = "Error in fetching casted vote count from database";
                         return View("Index");
                     }
 
-                    HttpContext.Session.Set<ModUser>("LoggedinUser", l_ModLoggedInUser);
+                    int l_TotalVoteCount = l_ModLoggedInMember.LcCouncilSeats + l_ModLoggedInMember.ExCouncilSeats;
+                    int l_VoteCount = (int)l_Result;
+
+                    if (l_VoteCount >= l_TotalVoteCount)
+                    {
+                        return View("ErrorVoteLimit");
+                    }
+
+                    HttpContext.Session.Set<ModMember>("LoggedInMember", l_ModLoggedInMember);
                     return RedirectToAction("Index", "Profile");
                 }
             }
-            catch (Exception ex)
-            {
-                new CmConnectionHelper().WriteToFile(ex.Message);
-                TempData["ErrorMessage"] = ex.Message;
-                return View("Index");
-            }
+        }
+        catch (Exception ex)
+        {
+            new CmConnectionHelper().Vd_WriteToFile(ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+            return View("Index");
         }
     }
 }

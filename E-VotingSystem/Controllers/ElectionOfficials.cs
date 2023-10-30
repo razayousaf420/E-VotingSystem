@@ -1,64 +1,138 @@
-﻿using E_VotingSystem.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using System.Data;
 using System.Data.SqlClient;
+using Microsoft.AspNetCore.Mvc;
 
-namespace E_VotingSystem.Controllers
+public class ElectionOfficials : Controller
 {
-	public class ElectionOfficials : Controller
-	{
+    [HttpGet]
+    public IActionResult Index()
+    {
+        return View();
+    }
 
-		SqlConnection l_SqlConnection = new SqlConnection();
-		SqlCommand l_SqlCommand = new SqlCommand();
-		SqlDataReader? l_SqlDataReader;
-		public IActionResult Index()
-		{
-			return View();
-		}
+    [HttpPost]
+    public ActionResult Login(ModElectionOfficial l_ModElectionOfficial)
+    {
+        try
+        {
+            CmConnectionHelper l_CmConnectionHelper = new CmConnectionHelper();
+            string l_ConnectionString = l_CmConnectionHelper.Fnc_GetConnectionString();
 
-		void FncConnectionString()
-		{
-            l_SqlConnection.ConnectionString = new CmConnectionHelper().FncGetConnectionString();
+            using (SqlConnection l_SqlConnection = new SqlConnection(l_ConnectionString))
+            {
+                l_SqlConnection.Open();
+                SqlCommand l_SqlCommand = new SqlCommand();
+                l_SqlCommand.Connection = l_SqlConnection;
+                l_SqlCommand.Parameters.AddWithValue("@mElectionOfficialID", l_ModElectionOfficial.ElectionOfficialID?.Trim());
+                l_SqlCommand.Parameters.AddWithValue("@mPassword", l_ModElectionOfficial.Password?.Trim());
+                l_SqlCommand.CommandText = " SELECT * FROM TBU_ElectionOfficial WHERE ElectionOfficialID = @mElectionOfficialID AND Password = @mPassword ";
+
+                ModElectionOfficial l_LoggedInElectionOfficial = new ModElectionOfficial();
+                SqlDataReader l_SqlDataReader = l_SqlCommand.ExecuteReader();
+                if (l_SqlDataReader.Read() == true)
+                {
+                    l_LoggedInElectionOfficial.PKGUID = (Guid)l_SqlDataReader["PKGUID"];
+                    l_LoggedInElectionOfficial.ElectionOfficialID = (string)l_SqlDataReader["ElectionOfficialID"];
+                    l_LoggedInElectionOfficial.Password = (string)l_SqlDataReader["Password"];
+                    l_LoggedInElectionOfficial.ElectionOfficialName = (string)l_SqlDataReader["ElectionOfficialName"];
+                    l_LoggedInElectionOfficial.Region = (string)l_SqlDataReader["Region"];
+                    l_LoggedInElectionOfficial.Email = (string)l_SqlDataReader["Email"];
+                    l_LoggedInElectionOfficial.ContactNo = (string)l_SqlDataReader["ContactNo"];
+                    l_LoggedInElectionOfficial.Mobile = (string)l_SqlDataReader["Mobile"];
+                    l_LoggedInElectionOfficial.Address = (string)l_SqlDataReader["Address"];
+                }
+                else
+                {
+                    return View("ErrorLogin");
+                }
+
+                HttpContext.Session.Set<ModElectionOfficial>("LoggedInElectionOfficial", l_LoggedInElectionOfficial);
+                return RedirectToAction("CandidateVoteInfo");
+            }
         }
+        catch (Exception ex)
+        {
+            new CmConnectionHelper().Vd_WriteToFile(ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+            return View("Index");
+        }
+    }
 
-		[HttpPost]
-		public ActionResult Verify(ModElectionOfficials lModElectionOfficial)
-		{
-			DalInsertVoting l_DalInsertVoting = new DalInsertVoting();
-			FncConnectionString();
+    [HttpGet]
+    public ActionResult CandidateVoteInfo()
+    {
+        try
+        {
+            ModElectionOfficial? l_LoggedInElectionOfficial = HttpContext.Session.Get<ModElectionOfficial>("LoggedInElectionOfficial");
+            if (l_LoggedInElectionOfficial == null)
+            {
+                return View("Index");
+            }
 
-			l_SqlConnection.Open();
-			l_SqlCommand.Connection = l_SqlConnection;
-			l_SqlCommand.CommandText = "SELECT * FROM TBU_ElectionOfficials WHERE ID = @ID AND Password = @Password";
-			l_SqlCommand.Parameters.AddWithValue("@ID", lModElectionOfficial.ID);
-			l_SqlCommand.Parameters.AddWithValue("@Password", lModElectionOfficial.Password);
-			l_SqlDataReader = l_SqlCommand.ExecuteReader();
 
-			if (l_SqlDataReader.Read())
-			{
-				l_SqlConnection.Close();
+            ModCanidateResultDataSet l_ModCanidateResultDataSet = new ModCanidateResultDataSet();
+            CmConnectionHelper l_CmConnectionHelper = new CmConnectionHelper();
+            string l_ConnectionString = l_CmConnectionHelper.Fnc_GetConnectionString();
 
-				// This means the user is a valid election official.
-				return RedirectToAction("CandidateVoteInfo");
-			}
+            using (SqlConnection l_SqlConnection_Local = new SqlConnection(l_ConnectionString))
+            {
+                l_SqlConnection_Local.Open();
+                SqlCommand l_SqlCommand_Local = new SqlCommand("RptUI_Candidate_Result_Local", l_SqlConnection_Local);
+                l_SqlCommand_Local.Parameters.AddWithValue("@mRegionID", l_LoggedInElectionOfficial.Region);
+                l_SqlCommand_Local.CommandType = CommandType.StoredProcedure;
 
-			l_SqlConnection.Close();
-			return View("ErrorPassword"); // Password is incorrect or the user is not an election official
-		}
+                List<ModRptCandidateResult> l_ListModRptCandidateResult_Local = new List<ModRptCandidateResult>();
 
-		[HttpGet]
-		public ActionResult CandidateVoteInfo()
-		{
-			//db call
+                SqlDataReader l_SqlDataReader_Local = l_SqlCommand_Local.ExecuteReader();
+                while (l_SqlDataReader_Local.Read() == true)
+                {
+                    ModRptCandidateResult l_ModRptCandidateResult_Local = new ModRptCandidateResult();
+                    l_ModRptCandidateResult_Local.PKGUID = (Guid)l_SqlDataReader_Local["PKGUID"];
+                    l_ModRptCandidateResult_Local.CandidateID = (string)l_SqlDataReader_Local["CandidateID"];
+                    l_ModRptCandidateResult_Local.CandidateName = (string)l_SqlDataReader_Local["CandidateName"];
+                    l_ModRptCandidateResult_Local.Region = (string)l_SqlDataReader_Local["Region"];
+                    l_ModRptCandidateResult_Local.VoteCount = (int)l_SqlDataReader_Local["VoteCount"];
+                    l_ModRptCandidateResult_Local.Image = (string)l_SqlDataReader_Local["Image"];
 
-			FncConnectionString();
-			DalInsertVoting l_dalInsertVoting = new DalInsertVoting();
+                    l_ListModRptCandidateResult_Local.Add(l_ModRptCandidateResult_Local);
+                }
 
-			List<ModCandidateVoteInfo> l_ListModCandidateVoteInfo = new List<ModCandidateVoteInfo>();
-			l_ListModCandidateVoteInfo = l_dalInsertVoting.FncGetResultOfCandidates(l_SqlConnection.ConnectionString);
-			return View("CandidateVoteInfo", l_ListModCandidateVoteInfo);
+                l_ModCanidateResultDataSet.ListModRptCandidateResult_Local = l_ListModRptCandidateResult_Local;
+            }
 
-		}
+            using (SqlConnection l_SqlConnection_Executive = new SqlConnection(l_ConnectionString))
+            {
+                l_SqlConnection_Executive.Open();
+                SqlCommand l_SqlCommand_Executive = new SqlCommand("RptUI_Candidate_Result_Executive", l_SqlConnection_Executive);
+                l_SqlCommand_Executive.Parameters.AddWithValue("@mRegionID", l_LoggedInElectionOfficial.Region);
+                l_SqlCommand_Executive.CommandType = CommandType.StoredProcedure;
 
-	}
+                List<ModRptCandidateResult> l_ListModRptCandidateResult_Executive = new List<ModRptCandidateResult>();
+
+                SqlDataReader l_SqlDataReader_Executive = l_SqlCommand_Executive.ExecuteReader();
+                while (l_SqlDataReader_Executive.Read() == true)
+                {
+                    ModRptCandidateResult l_ModRptCandidateResult_Executive = new ModRptCandidateResult();
+                    l_ModRptCandidateResult_Executive.PKGUID = (Guid)l_SqlDataReader_Executive["PKGUID"];
+                    l_ModRptCandidateResult_Executive.CandidateID = (string)l_SqlDataReader_Executive["CandidateID"];
+                    l_ModRptCandidateResult_Executive.CandidateName = (string)l_SqlDataReader_Executive["CandidateName"];
+                    l_ModRptCandidateResult_Executive.Region = (string)l_SqlDataReader_Executive["Region"];
+                    l_ModRptCandidateResult_Executive.VoteCount = (int)l_SqlDataReader_Executive["VoteCount"];
+                    l_ModRptCandidateResult_Executive.Image = (string)l_SqlDataReader_Executive["Image"];
+
+                    l_ListModRptCandidateResult_Executive.Add(l_ModRptCandidateResult_Executive);
+                }
+
+                l_ModCanidateResultDataSet.ListModRptCandidateResult_Executive = l_ListModRptCandidateResult_Executive;
+            }
+
+            return View("CandidateVoteInfo", l_ModCanidateResultDataSet);
+        }
+        catch (Exception ex)
+        {
+            new CmConnectionHelper().Vd_WriteToFile(ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+            return View("Index");
+        }
+    }
 }

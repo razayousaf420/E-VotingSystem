@@ -1,28 +1,30 @@
-﻿@model List<ModCandidate>
+﻿@using Microsoft.AspNetCore.Hosting
 
-
+@model List<ModCandidate>
 @{
-    ViewData["Title"] = "Executive";
-    Layout = null;
+    List<ModCandidate> l_ListModCandidate_Executive = new List<ModCandidate>();
+    l_ListModCandidate_Executive = @Model;
 }
-
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - E_VotingSystem</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/StyleSheetmodified.css" asp-append-version="true" />
-    <title>Executive</title>
+    <link rel="stylesheet" href="~/images/background.webp" asp-append-version="true" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 </head>
-<
+
 <body>
+
     <div class="container mt-4">
-        <h4 class="text-center">Executive</h4>
-        <!-- Add this section to display the error message -->
+        <h3 class="text-center">Executive Canidates List</h3> 
+        <h4 class="text-center">@l_ListModCandidate_Executive.First().Region Region</h4>
+
         @if (TempData["ErrorMessage"] != null)
         {
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -30,15 +32,14 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         }
-        <!-- End of error message section -->
 
         <div class="row">
-            <!-- Your existing code for displaying candidates -->
         </div>
     </div>
 
     <div class="container mt-4">
-        <form method="post" asp-controller="Profile" asp-action="CastVote">
+        <form method="post" asp-controller="Profile" asp-action="CastVoteExecutive">
+
             @if (Model != null)
             {
                 <div class="row card-container">
@@ -47,15 +48,29 @@
                         var candidate = Model[i];
                         <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
                             <div class="card">
+
+
+                              
+
+
                                 <div class="image-container">
-                                    <img src="~/images/@Model[i].ImageLocation" alt="Image Description" class="card-img-top">
+                                    @if (!string.IsNullOrEmpty(@Model[i].Image))
+                                    {
+                                        <img src="~/images/@Model[i].Image" alt="Image Description" class="card-img-top">
+
+                                    }
+                                    else
+                                    {
+                                        <img src="https://as1.ftcdn.net/v2/jpg/02/42/45/90/1000_F_242459076_53ffNaKxcGS1ioScWiSt50e9ltwvynqt.jpg" alt="Image Description" class="card-img-top">
+                                    }
+                                   
                                 </div>
                                 <div class="card-body">
-                                    <h5 class="card-title">@candidate.CandidateName</h5>
+                                    <h5 class="card-title">@candidate.CandidateID</h5>
                                     <p class="card-text">
-                                        <strong>Membership No:</strong> @candidate.MemberShipNo<br>
-                                        <strong>Mobile No:</strong> @candidate.MobileNo<br>
-                                        <strong>Nominate For:</strong> @candidate.NominateFor<br>
+                                        <strong>Membership No:</strong> @candidate.CandidateID<br>
+                                        <strong>Mobile No:</strong> @candidate.Mobile<br>
+                                        <strong>Nominate For:</strong> @candidate.NominatedFor<br>
                                         <strong>Region:</strong> @candidate.Region
                                     </p>
                                 </div>
@@ -63,7 +78,7 @@
                                     <div class="form-check form-check-inline">
                                         <input type="hidden" asp-for="@Model[i].PKGUID" />
                                         <input type="hidden" asp-for="@Model[i].CandidateName" />
-                                        <input type="hidden" asp-for="@Model[i].NominateFor" />
+                                        <input type="hidden" asp-for="@Model[i].NominatedFor" />
                                         <input type="checkbox" class="form-check-input" asp-for="@Model[i].IsVote" id="castVote_@Model[i].PKGUID">
                                         <label class="form-check-label link-button" for="castVote_@Model[i].PKGUID">Cast Vote</label>
                                     </div>
@@ -75,28 +90,18 @@
             }
             else
             {
-                <h3>No Candidates</h3>
+                <h3>No executive candidates are available.</h3>
             }
 
             <div class="text-center mt-4">
-                <button type="submit" class="btn btn-success">Submit Votes</button>
+                <button type="submit" class="btn btn-success">Submit Executive Votes</button>
             </div>
         </form>
     </div>
 
-    <div class="text-center mt-4">
-        <form method="post" asp-controller="Profile" asp-action="Logout">
-            <button type="submit" class="btn btn-primary">Logout</button>
-        </form>
-    </div>
-    <!-- Copyright -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 </body>
 
 </html>
-
-
-
-

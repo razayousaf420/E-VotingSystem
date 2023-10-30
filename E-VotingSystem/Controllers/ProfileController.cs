@@ -1,279 +1,302 @@
-﻿using E_VotingSystem.Models;
+﻿using System.Data;
+using System.Data.SqlClient;
 using Microsoft.AspNetCore.Mvc;
 
-using System.Data.SqlClient;
-
-namespace E_VotingSystem.Controllers
+public class ProfileController : Controller
 {
-    public class ProfileController : Controller
+    private const string G_Executive = "Executive";
+    private const string G_Local = "Local";
+
+    [HttpGet]
+    public ActionResult Index()
     {
-
-        SqlConnection l_SqlConnection = new SqlConnection();
-        SqlCommand l_SqlCommand = new SqlCommand();
-        SqlDataReader? l_SqlDataReader;
-        public IActionResult Index()
+        ModMember? l_ModLoggedInMember = HttpContext.Session.Get<ModMember>("LoggedInMember");
+        if (l_ModLoggedInMember == null)
         {
-            ModUser l_ModLoggedInUser = HttpContext.Session.Get<ModUser>("LoggedinUser")!;
-
-            return View(l_ModLoggedInUser);
-        }
-
-        void FncConnectionString()
-        {
-            l_SqlConnection.ConnectionString = new CmConnectionHelper().FncGetConnectionString();
-        }
-
-        [HttpPost]
-
-        public IActionResult Category()
-        {
-            // Your logic for casting a vote goes here if needed.
-
-            ModUser l_ModLoggedInUser = new ModUser();
-            l_ModLoggedInUser = HttpContext.Session.Get<ModUser>("LoggedinUser")!;
-            return View("category", l_ModLoggedInUser);
-        }
-
-
-        [HttpPost]
-        public IActionResult Logout()
-        {
-            // Perform any necessary logout actions here, such as clearing user data or session.
-
-            // Redirect to the "Index" action of the "Account" controller
             return RedirectToAction("Index", "Account");
         }
 
+        return View(l_ModLoggedInMember);
+    }
 
-        [HttpPost]
-
-        public IActionResult CastVote(List<ModCandidate> l_ListModCandidates)
+    [HttpGet]
+    public ActionResult Local()
+    {
+        try
         {
-            DalInsertVoting l_DalInsertVoting = new DalInsertVoting();
-            List<ModVoter> l_ListVoterMode = new List<ModVoter>();
-            ModUser l_ModLoggedInUser = HttpContext.Session.Get<ModUser>("LoggedinUser")!;
-
-            // Validate l_ModLoggedInUser.LcRegionSeats before parsing
-            if (!int.TryParse(l_ModLoggedInUser.LcRegionSeats, out int l_LocalRegionSeats))
+            ModMember? l_ModLoggedInMember = HttpContext.Session.Get<ModMember>("LoggedInMember");
+            if (l_ModLoggedInMember == null)
             {
-                // Handle the case where l_ModLoggedInUser.LcRegionSeats is not a valid integer
-                // You can set an error message in TempData and return to the view
-                TempData["ErrorMessage"] = "Invalid Region Seats";
-                return RedirectToAction("Local");
+                return RedirectToAction("Index", "Account");
             }
 
-            l_ListModCandidates = l_ListModCandidates.Where(x => x.IsVote).ToList();
+            CmConnectionHelper l_CmConnectionHelper = new CmConnectionHelper();
+            string l_ConnectionString = l_CmConnectionHelper.Fnc_GetConnectionString();
 
-            for (int i = 0; i < l_ListModCandidates.Count; i++)
+            using (SqlConnection l_SqlConnection_Vote = new SqlConnection(l_ConnectionString))
             {
-                ModVoter lModVoter = new ModVoter
+                l_SqlConnection_Vote.Open();
+                SqlCommand l_SqlCommand_Vote = new SqlCommand();
+                l_SqlCommand_Vote.Connection = l_SqlConnection_Vote;
+                l_SqlCommand_Vote.Parameters.AddWithValue("@mMemberDID", l_ModLoggedInMember.PKGUID);
+                l_SqlCommand_Vote.CommandText = $" SELECT COUNT(*) AS VoteCount FROM TBU_Vote WHERE MemberDID = @mMemberDID  AND NominatedFor = '{G_Local}' ; ";
+
+                object l_Result = l_SqlCommand_Vote.ExecuteScalar();
+                if (l_Result == DBNull.Value)
                 {
-                    CandidateDID = l_ListModCandidates[i].PKGUID,
-                    UserDID = l_ModLoggedInUser.PKGUID,
-                    isVote = l_ListModCandidates[i].IsVote,
-                    VoteTimestamp = DateTime.Now,
-                    PKGUID = Guid.NewGuid().ToString()
-                };
-                l_ListVoterMode.Add(lModVoter);
-            }
-
-            if (l_ListVoterMode.Count == l_LocalRegionSeats)
-            {
-                FncConnectionString();
-                int? lUserCount = l_DalInsertVoting.FncGetRecordCountForUser(l_ModLoggedInUser.PKGUID!, l_SqlConnection.ConnectionString);
-
-                if (lUserCount == l_LocalRegionSeats)
-                {
-                    TempData["ErrorMessage"] = $"{l_ModLoggedInUser.MemberName} have to select at least {l_LocalRegionSeats} candidates.";
-                    TempData["SeatsCount"] = l_LocalRegionSeats;
-
-                    return View("Local");
+                    TempData["ErrorMessage"] = "Error in fetching casted vote count from database";
+                    return View("Index");
                 }
 
-                FncConnectionString();
+                int l_VoteCount = (int)l_Result;
 
-                l_DalInsertVoting.FncInsertModVotersList(l_ListVoterMode, l_SqlConnection.ConnectionString);
-
-                return View("votescasted");
-            }
-            else
-            {
-                TempData["ErrorMessage"] = $"{l_ModLoggedInUser.MemberName} have to select at least {l_LocalRegionSeats} candidates.";
-                return RedirectToAction("Local");
-            }
-        }
-
-
-        [HttpPost]
-        public IActionResult CastVoteEx(List<ModCandidate> l_ListModCandidates)
-        {
-            List<ModVoter> l_ListVoterMode = new List<ModVoter>();
-            ModUser l_ModLoggedInUser = HttpContext.Session.Get<ModUser>("LoggedinUser")!;
-            l_ListModCandidates = l_ListModCandidates.Where(x => x.IsVote).ToList();
-
-            DalInsertVoting l_DalInsertVoting = new DalInsertVoting();
-
-            // Validate l_ModLoggedInUser.ExRegionSeats before parsing
-            if (!int.TryParse(l_ModLoggedInUser.ExRegionSeats, out int l_ExecutiveRegionSeats))
-            {
-                // Handle the case where l_ModLoggedInUser.ExRegionSeats is not a valid integer
-                // You can set an error message in TempData and return to the view
-                TempData["ErrorMessage"] = "Invalid Executive Region Seats";
-                return RedirectToAction("Executive");
-            }
-
-            for (int i = 0; i < l_ListModCandidates.Count; i++)
-            {
-                ModVoter lModVoter = new ModVoter
+                if (l_VoteCount >= l_ModLoggedInMember.LcCouncilSeats)
                 {
-                    CandidateDID = l_ListModCandidates[i].PKGUID,
-                    UserDID = l_ModLoggedInUser.PKGUID,
-                    isVote = l_ListModCandidates[i].IsVote,
-                    VoteTimestamp = DateTime.Now,
-                    PKGUID = Guid.NewGuid().ToString()
-                };
-                l_ListVoterMode.Add(lModVoter);
+                    return View("ErrorLocalVoteLimit", l_ModLoggedInMember);
+                }
             }
 
-            if (l_ListVoterMode.Count == l_ExecutiveRegionSeats)
+            List<ModCandidate> l_ListModCandidate_Local = new List<ModCandidate>();
+
+            using (SqlConnection l_SqlConnection = new SqlConnection(l_ConnectionString))
             {
-                FncConnectionString();
                 l_SqlConnection.Open();
+                SqlCommand l_SqlCommand = new SqlCommand();
                 l_SqlCommand.Connection = l_SqlConnection;
+                l_SqlCommand.Parameters.AddWithValue("@mRegion", l_ModLoggedInMember.Region);
+                l_SqlCommand.CommandText = $" SELECT * FROM TBU_Candidate WHERE Region = @mRegion AND NominatedFor = '{G_Local}' ";
 
-                int? lUserCount = l_DalInsertVoting.FncGetRecordCountForUser(l_ModLoggedInUser.PKGUID!, l_SqlConnection.ConnectionString);
 
-                if (lUserCount == l_ExecutiveRegionSeats)
+                SqlDataReader l_SqlDataReader = l_SqlCommand.ExecuteReader();
+                while (l_SqlDataReader.Read() == true)
                 {
-                    TempData["ErrorMessage"] = $"{l_ModLoggedInUser.MemberName} have to select at least {l_ExecutiveRegionSeats} candidates.";
-                    TempData["SeatsCount"] = l_ExecutiveRegionSeats;
-                    return View("Executive");
+                    ModCandidate l_ModCandidate = new ModCandidate();
+                    l_ModCandidate.PKGUID = (Guid)l_SqlDataReader["PKGUID"];
+                    l_ModCandidate.CandidateID = (string)l_SqlDataReader["CandidateID"];
+                    l_ModCandidate.CandidateName = (string)l_SqlDataReader["CandidateName"];
+                    l_ModCandidate.NominatedFor = (string)l_SqlDataReader["NominatedFor"];
+                    l_ModCandidate.Region = (string)l_SqlDataReader["Region"];
+                    l_ModCandidate.Email = (string)l_SqlDataReader["Email"];
+                    l_ModCandidate.ContactNo = (string)l_SqlDataReader["ContactNo"];
+                    l_ModCandidate.Mobile = (string)l_SqlDataReader["Mobile"];
+                    l_ModCandidate.Address = (string)l_SqlDataReader["Address"];
+                    l_ModCandidate.Image = (string)l_SqlDataReader["Image"];
+                    l_ModCandidate.IsVote = false;
+
+                    l_ListModCandidate_Local.Add(l_ModCandidate);
+                }
+            }
+
+            return View("Local", l_ListModCandidate_Local);
+        }
+        catch (Exception ex)
+        {
+            new CmConnectionHelper().Vd_WriteToFile(ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+            return View("Index");
+        }
+    }
+
+    [HttpGet]
+    public ActionResult Executive()
+    {
+        try
+        {
+            ModMember? l_ModLoggedInMember = HttpContext.Session.Get<ModMember>("LoggedInMember");
+            if (l_ModLoggedInMember == null)
+            {
+                return RedirectToAction("Index", "Account");
+            }
+
+            CmConnectionHelper l_CmConnectionHelper = new CmConnectionHelper();
+            string l_ConnectionString = l_CmConnectionHelper.Fnc_GetConnectionString();
+
+            using (SqlConnection l_SqlConnection_Vote = new SqlConnection(l_ConnectionString))
+            {
+                l_SqlConnection_Vote.Open();
+                SqlCommand l_SqlCommand_Vote = new SqlCommand();
+                l_SqlCommand_Vote.Connection = l_SqlConnection_Vote;
+                l_SqlCommand_Vote.Parameters.AddWithValue("@mMemberDID", l_ModLoggedInMember.PKGUID);
+                l_SqlCommand_Vote.CommandText = $" SELECT COUNT(*) AS VoteCount FROM TBU_Vote WHERE MemberDID = @mMemberDID  AND NominatedFor = '{G_Executive}' ; ";
+
+                object l_Result = l_SqlCommand_Vote.ExecuteScalar();
+                if (l_Result == DBNull.Value)
+                {
+                    TempData["ErrorMessage"] = "Error in fetching casted vote count from database";
+                    return View("Index");
                 }
 
-                FncConnectionString();
+                int l_VoteCount = (int)l_Result;
 
-                l_DalInsertVoting.FncInsertModVotersList(l_ListVoterMode, l_SqlConnection.ConnectionString);
-                return View("votescasted");
-            }
-            else
-            {
-                TempData["ErrorMessage"] = $"{l_ModLoggedInUser.MemberName} have to select at least {l_ExecutiveRegionSeats} candidates.";
-                return RedirectToAction("Executive");
-            }
-        }
-        [HttpGet]
-
-        public IActionResult Executive()
-        {
-            ModUser l_ModLoggedInUser = HttpContext.Session.Get<ModUser>("LoggedinUser")!;
-            List<ModCandidate> list_ModCandidate = new List<ModCandidate>();
-            FncConnectionString();
-            DalInsertVoting l_DalInsertVoting = new DalInsertVoting();
-
-            //if (l_ModLoggedInUser== null)
-            //{
-            //    return RedirectToAction("Index","Account");
-
-            //}
-
-            int? lUserCount = l_DalInsertVoting.FncGetRecordCountForUser(l_ModLoggedInUser.PKGUID!, l_SqlConnection.ConnectionString);
-
-            if (lUserCount == 1)
-            {
-
-                TempData["ErrorMessage"] = l_ModLoggedInUser.MemberName;
-                return View("Executive");
-
-            }
-
-
-            FncConnectionString();
-            l_SqlConnection.Open();
-            l_SqlCommand.Connection = l_SqlConnection;
-            l_SqlCommand.CommandText = "SELECT * FROM TBU_Candidate WHERE Region = @Region AND NominateFor = 'Executive Council'";
-            l_SqlCommand.Parameters.AddWithValue("@Region", l_ModLoggedInUser.Region); l_SqlDataReader = l_SqlCommand.ExecuteReader();
-
-            while (l_SqlDataReader.Read())
-            {
-                ModCandidate l_ModCandidate = new ModCandidate
+                if (l_VoteCount >= l_ModLoggedInMember.ExCouncilSeats)
                 {
-                    PKGUID = l_SqlDataReader["PKGUID"] as string,
-                    MemberShipNo = l_SqlDataReader["MemberShipNo"] as string,
-                    CandidateName = l_SqlDataReader["CandidateName"] as string,
-                    Address = l_SqlDataReader["Address"] as string,
-                    MobileNo = l_SqlDataReader["MobileNo"] as string,
-                    CompanyName = l_SqlDataReader["CompanyName"] as string,
-                    Profile = l_SqlDataReader["Profile"] as string,
-                    ProposedBy = l_SqlDataReader["ProposedBy"] as string,
-                    SecondBy = l_SqlDataReader["SecondBy"] as string,
-                    NominateFor = l_SqlDataReader["NominateFor"] as string,
-                    Region = l_SqlDataReader["Region"] as string,
-                    ImageLocation = l_SqlDataReader["ImageLocation"] as string
-                };
-                list_ModCandidate.Add(l_ModCandidate);
+                    return View("ErrorExecutiveVoteLimit", l_ModLoggedInMember);
+                }
             }
 
-            l_SqlConnection.Close();
+            List<ModCandidate> l_ListModCandidate_Executive = new List<ModCandidate>();
 
-            HttpContext.Session.Set<List<ModCandidate>>("Candidates", list_ModCandidate);
-            return View("Executive", list_ModCandidate);
-        }
-
-
-        [HttpGet]
-        public IActionResult Local()
-        {
-            ModUser l_ModLoggedInUser = HttpContext.Session.Get<ModUser>("LoggedinUser")!;
-            //if (l_ModLoggedInUser== null)
-            //{
-            //    return RedirectToAction("Index","Account");
-
-            //}
-            List<ModCandidate> list_ModLoaclCandidate = new List<ModCandidate>();
-            DalInsertVoting l_DalInsertVoting = new DalInsertVoting();
-            FncConnectionString();
-            int? lUserCount = l_DalInsertVoting.FncGetRecordCountForUser(l_ModLoggedInUser.PKGUID!, l_SqlConnection.ConnectionString);
-
-            if (lUserCount == 5)
+            using (SqlConnection l_SqlConnection = new SqlConnection(l_ConnectionString))
             {
+                l_SqlConnection.Open();
+                SqlCommand l_SqlCommand = new SqlCommand();
+                l_SqlCommand.Connection = l_SqlConnection;
+                l_SqlCommand.Parameters.AddWithValue("@mRegion", l_ModLoggedInMember.Region);
+                l_SqlCommand.CommandText = $" SELECT * FROM TBU_Candidate WHERE Region = @mRegion AND NominatedFor = '{G_Executive}' ";
 
-                TempData["ErrorMessage"] = l_ModLoggedInUser.MemberName;
-                return View("Local");
 
-            }
-
-            FncConnectionString();
-            l_SqlConnection.Open();
-            l_SqlCommand.Connection = l_SqlConnection;
-            l_SqlCommand.CommandText = "SELECT * FROM TBU_Candidate WHERE Region = @Region AND NominateFor = 'Local Coucil'";
-            l_SqlCommand.Parameters.AddWithValue("@Region", l_ModLoggedInUser.Region);
-            l_SqlDataReader = l_SqlCommand.ExecuteReader();
-
-            while (l_SqlDataReader.Read())
-            {
-                ModCandidate l_ModCandidate = new ModCandidate
+                SqlDataReader l_SqlDataReader = l_SqlCommand.ExecuteReader();
+                while (l_SqlDataReader.Read() == true)
                 {
-                    PKGUID = l_SqlDataReader["PKGUID"] as string,
-                    MemberShipNo = l_SqlDataReader["MemberShipNo"] as string,
-                    CandidateName = l_SqlDataReader["CandidateName"] as string,
-                    Address = l_SqlDataReader["Address"] as string,
-                    MobileNo = l_SqlDataReader["MobileNo"] as string,
-                    CompanyName = l_SqlDataReader["CompanyName"] as string,
-                    Profile = l_SqlDataReader["Profile"] as string,
-                    ProposedBy = l_SqlDataReader["ProposedBy"] as string,
-                    SecondBy = l_SqlDataReader["SecondBy"] as string,
-                    NominateFor = l_SqlDataReader["NominateFor"] as string,
-                    Region = l_SqlDataReader["Region"] as string,
-                    ImageLocation = l_SqlDataReader["ImageLocation"] as string
-                };
-                list_ModLoaclCandidate.Add(l_ModCandidate);
+                    ModCandidate l_ModCandidate = new ModCandidate();
+                    l_ModCandidate.PKGUID = (Guid)l_SqlDataReader["PKGUID"];
+                    l_ModCandidate.CandidateID = (string)l_SqlDataReader["CandidateID"];
+                    l_ModCandidate.CandidateName = (string)l_SqlDataReader["CandidateName"];
+                    l_ModCandidate.NominatedFor = (string)l_SqlDataReader["NominatedFor"];
+                    l_ModCandidate.Region = (string)l_SqlDataReader["Region"];
+                    l_ModCandidate.Email = (string)l_SqlDataReader["Email"];
+                    l_ModCandidate.ContactNo = (string)l_SqlDataReader["ContactNo"];
+                    l_ModCandidate.Mobile = (string)l_SqlDataReader["Mobile"];
+                    l_ModCandidate.Address = (string)l_SqlDataReader["Address"];
+                    l_ModCandidate.Image = (string)l_SqlDataReader["Image"];
+                    l_ModCandidate.IsVote = false;
+
+                    l_ListModCandidate_Executive.Add(l_ModCandidate);
+                }
             }
 
-            l_SqlConnection.Close();
-
-            HttpContext.Session.Set<List<ModCandidate>>("LocalCandidates", list_ModLoaclCandidate);
-            return View("Local", list_ModLoaclCandidate);
+            return View("Executive", l_ListModCandidate_Executive);
         }
+        catch (Exception ex)
+        {
+            new CmConnectionHelper().Vd_WriteToFile(ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+            return View("Index");
+        }
+    }
 
+    [HttpPost]
+    public ActionResult CastVoteLocal(List<ModCandidate> l_ListModCandidate_Local)
+    {
+        try
+        {
+            ModMember? l_ModLoggedInMember = HttpContext.Session.Get<ModMember>("LoggedInMember");
+            if (l_ModLoggedInMember == null)
+            {
+                return View(new List<ModMember>());
+            }
+
+            int l_TotalVoteCount = l_ListModCandidate_Local.Where(x => x.IsVote == true).Count();
+
+            if (l_TotalVoteCount < l_ModLoggedInMember.LcCouncilSeats)
+            {
+                TempData["ErrorMessage"] = $"You have to select at least {l_ModLoggedInMember.LcCouncilSeats} local candidates";
+                return View("Local", l_ListModCandidate_Local);
+            }
+
+            if (l_TotalVoteCount > l_ModLoggedInMember.LcCouncilSeats)
+            {
+                TempData["ErrorMessage"] = $"You can not select more than {l_ModLoggedInMember.LcCouncilSeats} local candidates";
+                return View("Local", l_ListModCandidate_Local);
+            }
+
+            IEnumerableVote l_IEnumerableVote = new IEnumerableVote();
+            foreach (ModCandidate l_ModCandidate in l_ListModCandidate_Local.Where(x => x.IsVote == true))
+            {
+                ModVote l_ModVote = new ModVote();
+                l_ModVote.PKGUID = Guid.NewGuid();
+                l_ModVote.MemberDID = l_ModLoggedInMember.PKGUID;
+                l_ModVote.CandidateDID = l_ModCandidate.PKGUID;
+                l_ModVote.NominatedFor = G_Local;
+                l_ModVote.VoteDate = DateTime.Now;
+
+                l_IEnumerableVote.Add(l_ModVote);
+            }
+
+            CmConnectionHelper l_CmConnectionHelper = new CmConnectionHelper();
+            string l_ConnectionString = l_CmConnectionHelper.Fnc_GetConnectionString();
+            using (SqlConnection l_SqlConnection = new SqlConnection(l_ConnectionString))
+            {
+                l_SqlConnection.Open();
+
+                SqlCommand l_SqlCommand = new SqlCommand("Pr_TBU_Vote_CRUDm", l_SqlConnection);
+                l_SqlCommand.CommandType = CommandType.StoredProcedure;
+                l_SqlCommand.Parameters.Add("@mTP_Vote_CRUDm", SqlDbType.Structured);
+                l_SqlCommand.Parameters["@mTP_Vote_CRUDm"].Value = l_IEnumerableVote;
+                l_SqlCommand.Parameters["@mTP_Vote_CRUDm"].Direction = ParameterDirection.Input;
+
+                l_SqlCommand.ExecuteNonQuery();
+                return View("VotesCastedLocal");
+            }
+        }
+        catch (Exception ex)
+        {
+            new CmConnectionHelper().Vd_WriteToFile(ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+            return View("Index");
+        }
+    }
+
+
+    [HttpPost]
+    public ActionResult CastVoteExecutive(List<ModCandidate> l_ListModCandidate_Executive)
+    {
+        try
+        {
+            ModMember? l_ModLoggedInMember = HttpContext.Session.Get<ModMember>("LoggedInMember");
+            if (l_ModLoggedInMember == null)
+            {
+                return View(new List<ModMember>());
+            }
+
+            int l_TotalVoteCount = l_ListModCandidate_Executive.Where(x => x.IsVote == true).Count();
+
+            if (l_TotalVoteCount < l_ModLoggedInMember.ExCouncilSeats)
+            {
+                TempData["ErrorMessage"] = $"You have to select at least {l_ModLoggedInMember.ExCouncilSeats} executive candidates";
+                return View("Executive", l_ListModCandidate_Executive);
+            }
+
+            if (l_TotalVoteCount > l_ModLoggedInMember.ExCouncilSeats)
+            {
+                TempData["ErrorMessage"] = $"You can not select more than {l_ModLoggedInMember.ExCouncilSeats} executive candidates";
+                return View("Executive", l_ListModCandidate_Executive);
+            }
+
+            IEnumerableVote l_IEnumerableVote = new IEnumerableVote();
+            foreach (ModCandidate l_ModCandidate in l_ListModCandidate_Executive.Where(x => x.IsVote == true))
+            {
+                ModVote l_ModVote = new ModVote();
+                l_ModVote.PKGUID = Guid.NewGuid();
+                l_ModVote.MemberDID = l_ModLoggedInMember.PKGUID;
+                l_ModVote.CandidateDID = l_ModCandidate.PKGUID;
+                l_ModVote.NominatedFor = G_Executive;
+                l_ModVote.VoteDate = DateTime.Now;
+
+                l_IEnumerableVote.Add(l_ModVote);
+            }
+
+            CmConnectionHelper l_CmConnectionHelper = new CmConnectionHelper();
+            string l_ConnectionString = l_CmConnectionHelper.Fnc_GetConnectionString();
+            using (SqlConnection l_SqlConnection = new SqlConnection(l_ConnectionString))
+            {
+                l_SqlConnection.Open();
+
+                SqlCommand l_SqlCommand = new SqlCommand("Pr_TBU_Vote_CRUDm", l_SqlConnection);
+                l_SqlCommand.CommandType = CommandType.StoredProcedure;
+                l_SqlCommand.Parameters.Add("@mTP_Vote_CRUDm", SqlDbType.Structured);
+                l_SqlCommand.Parameters["@mTP_Vote_CRUDm"].Value = l_IEnumerableVote;
+                l_SqlCommand.Parameters["@mTP_Vote_CRUDm"].Direction = ParameterDirection.Input;
+
+                l_SqlCommand.ExecuteNonQuery();
+                return View("VotesCastedExecutive");
+            }
+        }
+        catch (Exception ex)
+        {
+            new CmConnectionHelper().Vd_WriteToFile(ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+            return View("Index");
+        }
     }
 }
