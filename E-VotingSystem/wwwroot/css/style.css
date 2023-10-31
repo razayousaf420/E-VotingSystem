@@ -260,6 +260,13 @@ h1 {
     flex-basis: 100%;
     margin-bottom: 1.5em;
     clear: both;
+    font-weight: bold;
+    color: black
+}
+
+.agile-field-txt input::placeholder {
+    font-weight: bold;
+    color: black;
 }
 
 .w3ls-login label i {

@@ -87,4 +87,22 @@ public class AccountController : Controller
             return View("Index");
         }
     }
+
+
+    [HttpPost]
+    public ActionResult Logout()
+    {
+        try
+        {
+            HttpContext.Session.Clear();
+            TempData["ErrorMessage"] = "You have logout successfully.";
+            return View("Index");
+        }
+        catch (Exception ex)
+        {
+            new CmConnectionHelper().Vd_WriteToFile(ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+            return View("Index");
+        }
+    }
 }

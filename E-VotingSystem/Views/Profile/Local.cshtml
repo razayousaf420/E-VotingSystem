@@ -1,9 +1,13 @@
 ﻿@using Microsoft.AspNetCore.Hosting
+@using Microsoft.AspNetCore.Mvc;
 
 @model List<ModCandidate>
+
 @{
     List<ModCandidate> l_ListModCandidate_Local = new List<ModCandidate>();
     l_ListModCandidate_Local = @Model;
+
+    ModMember? l_ModLoggedInMember = (ModMember?)TempData["LoggedInMember"];
 }
 
 <!DOCTYPE html>
@@ -11,7 +15,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-   
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/StyleSheetmodified.css" asp-append-version="true" />
@@ -20,10 +24,17 @@
 </head>
 
 <body>
-   
+
     <div class="container mt-4">
         <h3 class="text-center">Local Canidates List</h3>
         <h4 class="text-center">@l_ListModCandidate_Local.First().Region Region</h4>
+        <br />
+        @{
+            if (l_ModLoggedInMember != null)
+            {
+                <h4 class="text-center">Please Select Your @l_ModLoggedInMember.LcCouncilSeats Members</h4>
+            }
+        }
 
         @if (TempData["ErrorMessage"] != null)
         {
@@ -39,7 +50,7 @@
 
     <div class="container mt-4">
         <form method="post" asp-controller="Profile" asp-action="CastVoteLocal">
-          
+
             @if (Model != null)
             {
                 <div class="row card-container">
@@ -62,9 +73,9 @@
                                 <div class="card-body">
                                     <h5 class="card-title">@candidate.CandidateID</h5>
                                     <p class="card-text">
-                                        <strong>Membership No:</strong> @candidate.CandidateID<br>
-                                        <strong>Mobile No:</strong> @candidate.Mobile<br>
-                                        <strong>Nominate For:</strong> @candidate.NominatedFor<br>
+                                        <strong>Member ID:</strong> @candidate.CandidateID<br>
+                                        <strong>Mobile:</strong> @candidate.Mobile<br>
+                                        <strong>Nominated For:</strong> @candidate.NominatedFor<br>
                                         <strong>Region:</strong> @candidate.Region
                                     </p>
                                 </div>

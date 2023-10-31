@@ -4,6 +4,8 @@
 @{
     List<ModCandidate> l_ListModCandidate_Executive = new List<ModCandidate>();
     l_ListModCandidate_Executive = @Model;
+
+    ModMember? l_ModLoggedInMember = (ModMember?)TempData["LoggedInMember"];
 }
 
 <!DOCTYPE html>
@@ -24,6 +26,13 @@
     <div class="container mt-4">
         <h3 class="text-center">Executive Canidates List</h3> 
         <h4 class="text-center">@l_ListModCandidate_Executive.First().Region Region</h4>
+        <br />
+        @{
+            if (l_ModLoggedInMember != null)
+            {
+                <h4 class="text-center">Please Select Your @l_ModLoggedInMember.ExCouncilSeats Members</h4>
+            }
+        }
 
         @if (TempData["ErrorMessage"] != null)
         {
@@ -68,10 +77,10 @@
                                 <div class="card-body">
                                     <h5 class="card-title">@candidate.CandidateID</h5>
                                     <p class="card-text">
-                                        <strong>Membership No:</strong> @candidate.CandidateID<br>
-                                        <strong>Mobile No:</strong> @candidate.Mobile<br>
-                                        <strong>Nominate For:</strong> @candidate.NominatedFor<br>
-                                        <strong>Region:</strong> @candidate.Region
+                                        <strong>Member ID:</strong> @candidate.CandidateID<br>
+                                        <strong>Mobile:</strong> @candidate.Mobile<br>
+                                        <strong>Nominated For:</strong> @candidate.NominatedFor<br>
+                                        <strong>Region:</strong> @candidate.Region                                     
                                     </p>
                                 </div>
                                 <div class="card-footer text-center">

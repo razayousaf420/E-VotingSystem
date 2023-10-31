@@ -87,6 +87,7 @@ public class ProfileController : Controller
                 }
             }
 
+            TempData["LoggedInMember"] = l_ModLoggedInMember;
             return View("Local", l_ListModCandidate_Local);
         }
         catch (Exception ex)
@@ -165,6 +166,7 @@ public class ProfileController : Controller
                 }
             }
 
+            TempData["LoggedInMember"] = l_ModLoggedInMember;
             return View("Executive", l_ListModCandidate_Executive);
         }
         catch (Exception ex)
@@ -226,8 +228,37 @@ public class ProfileController : Controller
                 l_SqlCommand.Parameters["@mTP_Vote_CRUDm"].Direction = ParameterDirection.Input;
 
                 l_SqlCommand.ExecuteNonQuery();
-                return View("VotesCastedLocal");
             }
+
+            using (SqlConnection l_SqlConnection_Vote = new SqlConnection(l_ConnectionString))
+            {
+                l_SqlConnection_Vote.Open();
+                SqlCommand l_SqlCommand_Vote = new SqlCommand();
+                l_SqlCommand_Vote.Connection = l_SqlConnection_Vote;
+                l_SqlCommand_Vote.Parameters.AddWithValue("@mMemberDID", l_ModLoggedInMember.PKGUID);
+                l_SqlCommand_Vote.CommandText = $" SELECT COUNT(*) AS VoteCount FROM TBU_Vote WHERE MemberDID = @mMemberDID  AND NominatedFor = '{G_Executive}' ; ";
+
+                object l_Result = l_SqlCommand_Vote.ExecuteScalar();
+                if (l_Result == DBNull.Value)
+                {
+                    TempData["ErrorMessage"] = "Error in fetching casted vote count from database";
+                    return View("Index");
+                }
+
+                int l_VoteCount = (int)l_Result;
+
+                if (l_VoteCount >= l_ModLoggedInMember.LcCouncilSeats)
+                {
+                    TempData["IsVotesCastedExecutive"] = true;
+                }
+                else
+                {
+                    TempData["IsVotesCastedExecutive"] = false;
+                }
+            }
+
+            TempData["IsVotesCastedLocal"] = true;     
+            return View("VotesCasted");
         }
         catch (Exception ex)
         {
@@ -289,8 +320,37 @@ public class ProfileController : Controller
                 l_SqlCommand.Parameters["@mTP_Vote_CRUDm"].Direction = ParameterDirection.Input;
 
                 l_SqlCommand.ExecuteNonQuery();
-                return View("VotesCastedExecutive");
             }
+
+            using (SqlConnection l_SqlConnection_Vote = new SqlConnection(l_ConnectionString))
+            {
+                l_SqlConnection_Vote.Open();
+                SqlCommand l_SqlCommand_Vote = new SqlCommand();
+                l_SqlCommand_Vote.Connection = l_SqlConnection_Vote;
+                l_SqlCommand_Vote.Parameters.AddWithValue("@mMemberDID", l_ModLoggedInMember.PKGUID);
+                l_SqlCommand_Vote.CommandText = $" SELECT COUNT(*) AS VoteCount FROM TBU_Vote WHERE MemberDID = @mMemberDID  AND NominatedFor = '{G_Local}' ; ";
+
+                object l_Result = l_SqlCommand_Vote.ExecuteScalar();
+                if (l_Result == DBNull.Value)
+                {
+                    TempData["ErrorMessage"] = "Error in fetching casted vote count from database";
+                    return View("Index");
+                }
+
+                int l_VoteCount = (int)l_Result;
+
+                if (l_VoteCount >= l_ModLoggedInMember.LcCouncilSeats)
+                {
+                    TempData["IsVotesCastedLocal"] = true;
+                }
+                else
+                {
+                    TempData["IsVotesCastedLocal"] = false;
+                }
+            }
+
+            TempData["IsVotesCastedExecutive"] = true;         
+            return View("VotesCasted");
         }
         catch (Exception ex)
         {
