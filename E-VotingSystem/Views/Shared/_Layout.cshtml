@@ -1,25 +1,84 @@
-﻿<!DOCTYPE html>
+﻿<style>
+    /* Reset some default styles for better consistency */
+    body, h1, h2, p {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Style the header */
+    header {
+        background-color: #D7D5D3;
+        color: #fff;
+        display: flex;
+        justify-content: space-between;      
+        padding: 10px 20px;
+    }
+
+    /* Style the navigation menu */
+    nav ul {
+        list-style: none;
+    }
+
+        nav ul li {
+            display: inline;
+            margin-right: 20px;
+        }
+
+    nav a {
+        color: #fff;
+        text-decoration: none;
+    }
+
+    /* Style the content area */
+    .content {
+        padding: 20px;
+    }
+
+    /* Style the footer */
+    footer {
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        padding: 10px;
+    }
+</style>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - E_VotingSystem</title>
+    <title>@ViewData["Title"] - E-VotingSystem</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/E_VotingSystem.styles.css" asp-append-version="true" />
+    
+    @* Added By Me. *@
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/font-awesome.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/images/background.webp" asp-append-version="true" />
-
-
-    <link rel="stylesheet" href="~/E_VotingSystem.styles.css" asp-append-version="true" />
-   
+    <link rel="stylesheet" href="~/css/StyleSheetmodified.css" asp-append-version="true" />
 </head>
+
 <body>
+    <header>     
+    </header>  
+   
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            <p style="color:white; font-weight: bold; ">
+                    © 2023 Electronic Voting | Developed By
+                <a style="color:blue; font-weight: bold;" href="https://www.aisonesystems.com//" target="_blank">Aisone Systems</a>
+            </p>           
+        </div>
+    </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

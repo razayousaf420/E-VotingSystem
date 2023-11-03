@@ -1,17 +1,11 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/font-awesome.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/images/background.webp" asp-append-version="true" />
-
-    <link rel="stylesheet" href="~/E_VotingSystem.styles.css" asp-append-version="true" />
-
+    <link rel="stylesheet" href="~/images/bg.jpg" asp-append-version="true" />
 </head>
 <body>
     <div class="container">
@@ -26,7 +20,20 @@
         </div>
     </div>
 
-    <h1>Election Official Login</h1> 
+    <h1>OFFICIAL LOGIN</h1>
+  
+    <div style="
+    text-align: center;
+    margin: 0em auto;
+    position: relative;
+    box-sizing: border-box;
+    width: 100px;
+    height: auto;
+    ">
+        <img src="~/images/VotingLogo.webp" alt="Logo">
+    </div>
+
+
     <div class="w3ls-login box box--big">
 
         <form asp-controller="ElectionOfficials" asp-action="Login" method="post">
@@ -61,17 +68,5 @@
         </form>
     </div>
 
-    <div class="copy-wthree">
-        <p>
-            © 2023 Electronic voting. | Developed by
-            <a href="https://www.aisonesystems.com//" target="_blank">Aisone Systems</a>
-        </p>
-    </div>
-
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
 </body>
 </html>
-
-
