@@ -285,7 +285,8 @@ h1 {
     padding: 15px 20px;
     box-sizing: border-box;
     border: none;
-    border: 1px solid #eee;
+   /* border: 1px solid #eee;*/
+    border: 1px solid black;
     border-radius: 30px;
     -webkit-appearance: none;
     font-family: 'Source Sans Pro', sans-serif;
@@ -573,6 +574,27 @@ input:checked + .slider:before {
             }
 
 /* Responsive Styles */
+
+
+/* Default font size */
+#footer-text {
+    font-size: 16px;
+}
+
+/* Adjust font size for smaller screens */
+@media (max-width: 768px) {
+    #footer-text {
+        font-size: 14px;
+    }
+}
+
+/* Adjust font size for even smaller screens */
+@media (max-width: 576px) {
+    #footer-text {
+        font-size: 12px;
+    }
+}
+
 
 .text-left {
     text-align: right;

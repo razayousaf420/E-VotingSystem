@@ -18,17 +18,17 @@ function render() {
 }
 
 function phoneAuth() {
-  //  alert("Called");
-    debugger;
+  
+  
     var a = document.getElementById("number").value;
-   // alert("the value of a is " + a);
+   
     var number = a;
 
     const appVerifier = window.recaptchaVerifier;
-    alert(appVerifier);
-
+   
     firebase.auth().signInWithPhoneNumber(number, appVerifier)
         .then((confirmationResult) => {
+          
             window.confirmationResult = confirmationResult;
             console.log("Message has been sent");
             this.submit();
@@ -36,7 +36,7 @@ function phoneAuth() {
         .catch((error) => {
             handlePhoneAuthError(error);
         });
-}
+    }
 
 function handlePhoneAuthError(error) {
     if (error.code == 'auth/too-many-requests' && error.message != 'TOO_SHORT') {
@@ -48,21 +48,24 @@ function handlePhoneAuthError(error) {
     }
     console.error("Error from sending OTP to phone:", error);
 }
+function handleOTPVerificationError(error) {
+    console.error("Error verifying code:", error);
+    alert("Code not verified!");
+}
 
-function verifyOTP() {
+function verifyOTPMember() {
    // alert("VerifyCalled");
     var otp = "";
     for (var i = 1; i < 7; i++) {
         var inputElement = document.querySelector(".form-control" + i);
         otp += inputElement.value;
     }
-    alert(otp)
+   
 
     if (otp.length === 6) {
         confirmationResult.confirm(otp)
             .then((result) => {
                 console.log("Code verified:", result);
-                alert("Code verified!");
                 window.location.href = "/Profile/Index";
               
             })
@@ -73,8 +76,49 @@ function verifyOTP() {
         alert("Please enter a 6-digit code.");
     }
 }
+function verifyOTPOfficial() {
+    // alert("VerifyCalled");
+    var otp = "";
+    for (var i = 1; i < 7; i++) {
+        var inputElement = document.querySelector(".form-control" + i);
+        otp += inputElement.value;
+    }
 
-function handleOTPVerificationError(error) {
-    console.error("Error verifying code:", error);
-    alert("Code not verified!");
+
+    if (otp.length === 6) {
+        confirmationResult.confirm(otp)
+            .then((result) => {
+                console.log("Code verified:", result);
+                window.location.href = "/ElectionOfficials/CandidateVoteInfo";
+
+            })
+            .catch((error) => {
+                handleOTPVerificationError(error);
+            });
+    } else {
+        alert("Please enter a 6-digit code.");
+    }
+}
+function verifyOTPCommissioner() {
+    // alert("VerifyCalled");
+    var otp = "";
+    for (var i = 1; i < 7; i++) {
+        var inputElement = document.querySelector(".form-control" + i);
+        otp += inputElement.value;
+    }
+
+
+    if (otp.length === 6) {
+        confirmationResult.confirm(otp)
+            .then((result) => {
+                console.log("Code verified:", result);
+                window.location.href = "/ElectionCommissioner/Dashboard";
+
+            })
+            .catch((error) => {
+                handleOTPVerificationError(error);
+            });
+    } else {
+        alert("Please enter a 6-digit code.");
+    }
 }

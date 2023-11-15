@@ -10,6 +10,7 @@ public class ElectionOfficials : Controller
         return View();
     }
 
+    //Pending
     [HttpPost]
     public ActionResult Login(ModElectionOfficial l_ModElectionOfficial)
     {
@@ -46,8 +47,14 @@ public class ElectionOfficials : Controller
                     return View("ErrorLogin");
                 }
 
+                if (string.IsNullOrWhiteSpace(l_LoggedInElectionOfficial.Mobile))
+                {
+                    return View("ErrorMobile");
+                }
+
                 HttpContext.Session.Set<ModElectionOfficial>("LoggedInElectionOfficial", l_LoggedInElectionOfficial);
-                return RedirectToAction("CandidateVoteInfo");
+                return RedirectToAction("IndexOfficial", "OTP", l_LoggedInElectionOfficial);             
+                //return RedirectToAction("CandidateVoteInfo");
             }
         }
         catch (Exception ex)
@@ -58,6 +65,8 @@ public class ElectionOfficials : Controller
         }
     }
 
+   
+    //OK
     [HttpGet]
     public ActionResult CandidateVoteInfo()
     {
@@ -83,10 +92,12 @@ public class ElectionOfficials : Controller
 
                 List<ModRptCandidateResult> l_ListModRptCandidateResult_Local = new List<ModRptCandidateResult>();
 
+                Int64 i = 1;
                 SqlDataReader l_SqlDataReader_Local = l_SqlCommand_Local.ExecuteReader();
                 while (l_SqlDataReader_Local.Read() == true)
                 {
                     ModRptCandidateResult l_ModRptCandidateResult_Local = new ModRptCandidateResult();
+                    l_ModRptCandidateResult_Local.SrNo = i;
                     l_ModRptCandidateResult_Local.PKGUID = (Guid)l_SqlDataReader_Local["PKGUID"];
                     l_ModRptCandidateResult_Local.CandidateID = (string)l_SqlDataReader_Local["CandidateID"];
                     l_ModRptCandidateResult_Local.CandidateName = (string)l_SqlDataReader_Local["CandidateName"];
@@ -95,6 +106,7 @@ public class ElectionOfficials : Controller
                     l_ModRptCandidateResult_Local.Image = (string)l_SqlDataReader_Local["Image"];
 
                     l_ListModRptCandidateResult_Local.Add(l_ModRptCandidateResult_Local);
+                    i++;
                 }
 
                 l_ModCanidateResultDataSet.ListModRptCandidateResult_Local = l_ListModRptCandidateResult_Local;
@@ -109,10 +121,12 @@ public class ElectionOfficials : Controller
 
                 List<ModRptCandidateResult> l_ListModRptCandidateResult_Executive = new List<ModRptCandidateResult>();
 
+                Int64 i = 1;
                 SqlDataReader l_SqlDataReader_Executive = l_SqlCommand_Executive.ExecuteReader();
                 while (l_SqlDataReader_Executive.Read() == true)
                 {
                     ModRptCandidateResult l_ModRptCandidateResult_Executive = new ModRptCandidateResult();
+                    l_ModRptCandidateResult_Executive.SrNo = i;
                     l_ModRptCandidateResult_Executive.PKGUID = (Guid)l_SqlDataReader_Executive["PKGUID"];
                     l_ModRptCandidateResult_Executive.CandidateID = (string)l_SqlDataReader_Executive["CandidateID"];
                     l_ModRptCandidateResult_Executive.CandidateName = (string)l_SqlDataReader_Executive["CandidateName"];
@@ -121,12 +135,105 @@ public class ElectionOfficials : Controller
                     l_ModRptCandidateResult_Executive.Image = (string)l_SqlDataReader_Executive["Image"];
 
                     l_ListModRptCandidateResult_Executive.Add(l_ModRptCandidateResult_Executive);
+                    i++;
                 }
 
                 l_ModCanidateResultDataSet.ListModRptCandidateResult_Executive = l_ListModRptCandidateResult_Executive;
             }
 
             return View("CandidateVoteInfo", l_ModCanidateResultDataSet);
+        }
+        catch (Exception ex)
+        {
+            new CmConnectionHelper().Vd_WriteToFile(ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+            return View("Index");
+        }
+    }
+
+    //OK
+    [HttpGet]
+    public ActionResult CandidateVoteInfoDetailExecutive(string PKGUID)
+    {
+        try
+        {
+            Guid l_CandidateDID = Guid.Parse(PKGUID);
+
+            CmConnectionHelper l_CmConnectionHelper = new CmConnectionHelper();
+            string l_ConnectionString = l_CmConnectionHelper.Fnc_GetConnectionString();
+
+            List<ModRptCandidateResultDetail> l_ListModRptCandidateResultDetail = new List<ModRptCandidateResultDetail>();
+
+            using (SqlConnection l_SqlConnection_Local = new SqlConnection(l_ConnectionString))
+            {
+                l_SqlConnection_Local.Open();
+                SqlCommand l_SqlCommand_Local = new SqlCommand("RptUI_Candidate_Result_Detail_Executive", l_SqlConnection_Local);
+                l_SqlCommand_Local.Parameters.AddWithValue("@mPKGUID", l_CandidateDID);
+                l_SqlCommand_Local.CommandType = CommandType.StoredProcedure;
+
+                SqlDataReader l_SqlDataReader_Local = l_SqlCommand_Local.ExecuteReader();
+                while (l_SqlDataReader_Local.Read() == true)
+                {
+                    ModRptCandidateResultDetail l_ModRptCandidateResultDetail = new ModRptCandidateResultDetail();
+                    l_ModRptCandidateResultDetail.SrNo = (Int64)l_SqlDataReader_Local["SrNo"];
+                    l_ModRptCandidateResultDetail.MemberID = (string)l_SqlDataReader_Local["MemberID"];
+                    l_ModRptCandidateResultDetail.MemberName = (string)l_SqlDataReader_Local["MemberName"];
+                    l_ModRptCandidateResultDetail.Mobile = (string)l_SqlDataReader_Local["Mobile"];
+                    l_ModRptCandidateResultDetail.Region = (string)l_SqlDataReader_Local["Region"];
+                    l_ModRptCandidateResultDetail.VoteDate = (string)l_SqlDataReader_Local["VoteDate"];
+                    l_ModRptCandidateResultDetail.VoteTime = (string)l_SqlDataReader_Local["VoteTime"];
+
+                    l_ListModRptCandidateResultDetail.Add(l_ModRptCandidateResultDetail);
+                }
+            }
+
+            return View("CandidateVoteInfoDetail", l_ListModRptCandidateResultDetail);
+        }
+        catch (Exception ex)
+        {
+            new CmConnectionHelper().Vd_WriteToFile(ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+            return View("Index");
+        }
+    }
+
+    //OK
+    [HttpGet]
+    public ActionResult CandidateVoteInfoDetailLocal(string PKGUID)
+    {
+        try
+        {
+            Guid l_CandidateDID = Guid.Parse(PKGUID);
+
+            CmConnectionHelper l_CmConnectionHelper = new CmConnectionHelper();
+            string l_ConnectionString = l_CmConnectionHelper.Fnc_GetConnectionString();
+
+            List<ModRptCandidateResultDetail> l_ListModRptCandidateResultDetail = new List<ModRptCandidateResultDetail>();
+
+            using (SqlConnection l_SqlConnection_Local = new SqlConnection(l_ConnectionString))
+            {
+                l_SqlConnection_Local.Open();
+                SqlCommand l_SqlCommand_Local = new SqlCommand("RptUI_Candidate_Result_Detail_Local", l_SqlConnection_Local);
+                l_SqlCommand_Local.Parameters.AddWithValue("@mPKGUID", l_CandidateDID);
+                l_SqlCommand_Local.CommandType = CommandType.StoredProcedure;
+
+                SqlDataReader l_SqlDataReader_Local = l_SqlCommand_Local.ExecuteReader();
+                while (l_SqlDataReader_Local.Read() == true)
+                {
+                    ModRptCandidateResultDetail l_ModRptCandidateResultDetail = new ModRptCandidateResultDetail();
+                    l_ModRptCandidateResultDetail.SrNo = (Int64)l_SqlDataReader_Local["SrNo"];
+                    l_ModRptCandidateResultDetail.MemberID = (string)l_SqlDataReader_Local["MemberID"];
+                    l_ModRptCandidateResultDetail.MemberName = (string)l_SqlDataReader_Local["MemberName"];
+                    l_ModRptCandidateResultDetail.Mobile = (string)l_SqlDataReader_Local["Mobile"];
+                    l_ModRptCandidateResultDetail.Region = (string)l_SqlDataReader_Local["Region"];
+                    l_ModRptCandidateResultDetail.VoteDate = (string)l_SqlDataReader_Local["VoteDate"];
+                    l_ModRptCandidateResultDetail.VoteTime = (string)l_SqlDataReader_Local["VoteTime"];
+
+                    l_ListModRptCandidateResultDetail.Add(l_ModRptCandidateResultDetail);
+                }
+            }
+
+            return View("CandidateVoteInfoDetail", l_ListModRptCandidateResultDetail);
         }
         catch (Exception ex)
         {

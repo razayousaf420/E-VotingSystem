@@ -6,7 +6,7 @@
 
 public class ModRptCandidateResult
 {
-
+    public Int64? SrNo { get; set; }
     public Guid PKGUID { get; set; }
     public string? CandidateID { get; set; }
     public string? CandidateName { get; set; }

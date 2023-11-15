@@ -1,6 +1,5 @@
 ﻿using System.Data.SqlClient;
 using Microsoft.AspNetCore.Mvc;
-
 public class AccountController : Controller
 {
     [HttpGet]
@@ -9,6 +8,7 @@ public class AccountController : Controller
         return View();
     }
 
+    //Pending
     [HttpPost]
     public ActionResult Login(ModMember l_ModMember)
     {
@@ -41,10 +41,16 @@ public class AccountController : Controller
                     l_ModLoggedInMember.Address = (string)l_SqlDataReader_Member["Address"];
                     l_ModLoggedInMember.LcCouncilSeats = (int)l_SqlDataReader_Member["LcCouncilSeats"];
                     l_ModLoggedInMember.ExCouncilSeats = (int)l_SqlDataReader_Member["ExCouncilSeats"];
+                    l_ModLoggedInMember.IsEnabled = (bool)l_SqlDataReader_Member["IsEnabled"];
                 }
                 else
                 {
                     return View("ErrorLogin");
+                }
+                
+                if (l_ModLoggedInMember.IsEnabled == false)
+                {
+                    return View("ErrorEnabled");
                 }
 
                 if (string.IsNullOrWhiteSpace(l_ModLoggedInMember.Mobile))
@@ -76,7 +82,8 @@ public class AccountController : Controller
                     }
 
                     HttpContext.Session.Set<ModMember>("LoggedInMember", l_ModLoggedInMember);
-                    return RedirectToAction("Index", "Profile");
+                    return RedirectToAction("Index", "OTP", l_ModLoggedInMember);
+                    //return RedirectToAction("Index", "Profile");
                 }
             }
         }
@@ -88,14 +95,13 @@ public class AccountController : Controller
         }
     }
 
-
+    //OK
     [HttpPost]
     public ActionResult Logout()
     {
         try
         {
-            HttpContext.Session.Clear();
-            TempData["ErrorMessage"] = "You have logout successfully.";
+            HttpContext.Session.Clear();         
             return View("Index");
         }
         catch (Exception ex)

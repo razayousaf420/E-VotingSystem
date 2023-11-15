@@ -7,21 +7,20 @@
     <link rel="stylesheet" href="~/css/font-awesome.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/images/bg.jpg" asp-append-version="true" />
 </head>
-
 <body style="background: #ecf0f3;">
     <div class="container">
-      
+
         @if (TempData["ErrorMessage"] != null)
         {
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <strong> @TempData["ErrorMessage"]</strong>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        }   
-        
+        }
+
     </div>
 
-    <h1>MEMBER LOGIN</h1>
+    <h1>COMMISSIONER LOGIN</h1>
 
     <div style="
     text-align: center;
@@ -34,29 +33,24 @@
         <img src="~/images/VotingLogo.webp" alt="Logo">
     </div>
 
+
     <div class="w3ls-login box box--big">
 
-        <form asp-controller="Account" asp-action="Login" method="post">
-           
+        <form asp-controller="ElectionCommissioner" asp-action="Login" method="post">
             <div class="agile-field-txt">
-                <label><i class="fa fa-user" aria-hidden="true"></i>Member ID</label>
-                <input type="text" name="MemberID" placeholder="Enter Member ID" required="" style="color:black" />
+                <label><i class="fa fa-user" aria-hidden="true"></i>Election Commissioner ID</label>
+                <input type="text" name="ElectionCommissionerID" placeholder="Enter Election Commissioner ID" required="" />
             </div>
-           
             <div class="agile-field-txt">
                 <label><i class="fa fa-unlock-alt" aria-hidden="true"></i>Password</label>
-                <input type="password" name="Password" placeholder="Enter Password" required="" id="myInput" style="color:black" />
+                <input type="password" name="Password" placeholder="Enter Password" required="" id="myInput" />
                 <div class="agile_label">
                     <input id="check3" name="check3" type="checkbox" value="show password" onclick="myFunction()">
-                    <label class="check" for="check3">Show password</label>
+                    <label class="check" for="check3">Show Password</label>
                 </div>
 
                 <div class="agile-right">
-                    <a href="@Url.Action("Index", "ElectionOfficials")" class="minimal-button">Election Official Login</a>
-                </div>
-
-                <div class="agile-right">
-                    <a href="@Url.Action("Index", "ElectionCommissioner")" class="minimal-button">Election Commissioner Login</a>
+                    <a href="@Url.Action("Index", "Account")" class="minimal-button">Go Back</a>
                 </div>
             </div>
 
@@ -72,6 +66,8 @@
             </script>
 
             <input type="submit" value="LOGIN">
+
+
         </form>
     </div>
 

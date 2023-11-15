@@ -1,0 +1,110 @@
+﻿@model List<ModRptCandidateResultDetail>
+
+@{
+    List<ModRptCandidateResultDetail> l_ListModRptCandidateResultDetail = new List<ModRptCandidateResultDetail>();
+    l_ListModRptCandidateResultDetail = Model;
+}
+
+<style>
+    /* Custom styles for the table */
+    .table {
+        width: 100%;
+        width: 100%; /* Set a maximum width for the table */
+        margin: 0 auto; /* Center the table horizontally */
+        border-collapse: collapse; /* Collapse table borders */
+    }
+
+        .table th, .table td {
+            padding: 10px; /* Cell padding */
+            text-align: left; /* Cell text alignment */
+        }
+
+        .table th {
+            background-color: black; /* Header background color */
+            color: white; /* Header text color */
+        }
+
+        .table tbody tr:nth-child(odd) {
+            background-color: #f2f2f2; /* Background color for odd rows */
+        }
+
+        .table tbody tr:nth-child(even) {
+            background-color: #CCCCCC; /* Background color for even rows */
+        }
+
+    /* Custom style for the h1 heading */
+    h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    /* Custom style for the table caption (optional) */
+    .caption {
+        text-align: center;
+        font-style: italic;
+        color: #888;
+    }
+
+    /*YOUSAF */
+    .rounded-image {
+        border-radius: 50%;
+        width: 40px; /* Set the desired width */
+        height: 40px; /* Set the desired height */
+    }
+
+    .center-cell {
+        vertical-align: middle;
+        /*  text-align: center;  */ /* Optional: horizontally center the text */
+    }
+
+    .table-link {
+        cursor: pointer;
+        text-decoration: underline;
+        color: inherit;
+        font-weight: bold;
+    }
+</style>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body style="background: #ecf0f3;">
+    <div class="container mt-4">
+        <h1>VOTE DETAILS</h1>
+
+        <table class="table table-bordered table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Sr#</th>
+                    <th>Member ID</th>
+                    <th>Member Name</th>
+                    <th>Mobile</th>
+                    <th>Region</th>
+                    <th>Vote Date</th>
+                    <th>Vote Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (ModRptCandidateResultDetail l_ModRptCandidateResultDetail in l_ListModRptCandidateResultDetail)
+                {
+                    <tr>
+                        <td class="center-cell">@l_ModRptCandidateResultDetail.SrNo</td>
+                        <td class="center-cell">@l_ModRptCandidateResultDetail.MemberID</td>
+                        <td class="center-cell">@l_ModRptCandidateResultDetail.MemberName</td>
+                        <td class="center-cell">@l_ModRptCandidateResultDetail.Mobile</td>
+                        <td class="center-cell">@l_ModRptCandidateResultDetail.Region</td>
+                        <td class="center-cell">@l_ModRptCandidateResultDetail.VoteDate</td>
+                        <td class="center-cell">@l_ModRptCandidateResultDetail.VoteTime</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

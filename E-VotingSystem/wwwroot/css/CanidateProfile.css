@@ -1,0 +1,100 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    /*display: flex;*/
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #ecf0f3;
+}
+
+.wrapper,
+.wrapper .img-area {
+    background: #ecf0f3;
+    box-shadow: -3px -3px 7px #ffffff, 3px 3px 5px #ceced1;
+}
+
+.wrapper {
+    position: relative;
+    width: 250px;
+    height: 300px;
+    padding: 5px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+    .wrapper .icon {
+        font-size: 17px;
+        color: #31344b;
+        position: absolute;
+        cursor: pointer;
+        opacity: 0.7;
+        top: 15px;
+        height: 35px;
+        width: 35px;
+        text-align: center;
+        line-height: 35px;
+        border-radius: 50%;
+        font-size: 16px;
+    }
+
+        .wrapper .icon i {
+            position: relative;
+            z-index: 9;
+        }
+
+        .wrapper .icon.arrow {
+            left: 15px;
+        }
+
+        .wrapper .icon.dots {
+            right: 15px;
+        }
+
+    .wrapper .img-area {
+        /* height: calc(100% - 25px);
+    width: calc(100% - 25px);  image ke border white wali
+    */
+        height: 120px;
+        width: 120px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        float : inline-start;
+    }
+
+.img-area .inner-area {
+   /* height: calc(100% - 25px);
+    width: calc(100% - 25px);  ander wali image
+    */
+    height: 100px;  
+    width: 100px;
+    border-radius: 50%;
+}
+
+.inner-area img {
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.wrapper .name {
+    height: 100px;
+    width: 200px;
+    font-size: 20px;
+    font-weight: 500;
+    color: #31344b;
+    margin: 10px 0 5px 0;
+}

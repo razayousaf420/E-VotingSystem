@@ -7,17 +7,17 @@
     <link rel="stylesheet" href="~/css/font-awesome.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/images/bg.jpg" asp-append-version="true" />
 </head>
-<body>
+<body style="background: #ecf0f3;">
     <div class="container">
+
         @if (TempData["ErrorMessage"] != null)
         {
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong> @TempData["ErrorMessage"]!</strong>
+                <strong> @TempData["ErrorMessage"]</strong>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         }
-        <div class="row">
-        </div>
+
     </div>
 
     <h1>OFFICIAL LOGIN</h1>
@@ -49,6 +49,9 @@
                     <label class="check" for="check3">Show Password</label>
                 </div>
 
+                <div class="agile-right">
+                    <a href="@Url.Action("Index", "Account")" class="minimal-button">Go Back</a>
+                </div>
             </div>
 
             <script>

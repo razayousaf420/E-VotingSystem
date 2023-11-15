@@ -6,5 +6,3 @@
     public string? NominatedFor { get; set; }
     public DateTime VoteDate { get; set; }
 }
-
-

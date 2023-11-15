@@ -1,0 +1,107 @@
+﻿<style>
+    .button-84 {
+        align-items: center;
+        background-color: initial;
+        background-image: linear-gradient(#464d55, #25292e);
+        border-radius: 8px;
+        border-width: 0;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, .1),0 3px 6px rgba(0, 0, 0, .05);
+        box-sizing: border-box;
+        color: #fff;
+        cursor: pointer;
+        display: inline-flex;
+        flex-direction: column;
+        font-family: expo-brand-demi,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+        font-size: 18px;
+        height: 52px;
+        justify-content: center;
+        line-height: 1;
+        margin: 0;
+        outline: none;
+        overflow: hidden;
+        padding: 0 32px;
+        text-align: center;
+        text-decoration: none;
+        transform: translate3d(0, 0, 0);
+        transition: all 150ms;
+        vertical-align: baseline;
+        white-space: nowrap;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+    }
+
+        .button-84:hover {
+            box-shadow: rgba(0, 1, 0, .2) 0 2px 8px;
+            opacity: .85;
+        }
+
+        .button-84:active {
+            outline: 0;
+        }
+
+        .button-84:focus {
+            box-shadow: rgba(0, 0, 0, .5) 0 0 0 3px;
+        }
+
+</style>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body style="background:#ecf0f3;">
+    <div class="container">
+        <br />
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong> @TempData["ErrorMessage"]</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+    </div>
+
+    <h1>Election Commisioner Dashboard</h1>
+
+    <form method="post">
+        <div class="mb-3">
+            <label class="form-label" style="float: left; font-weight: bold;">Member ID : </label>
+            <input class="form-control" type="text" name="MemberID" placeholder="Enter Member ID" required="" />
+        </div>
+
+        <div class="mb-3">
+            <button class="button-84" type="submit" asp-controller="ElectionCommissioner" asp-action="CheckStatus">Check Vote Status</button>
+
+            <button class="button-84" type="submit" asp-controller="ElectionCommissioner" asp-action="Enable">Enable Candidate</button>
+
+            <button class="button-84" type="submit" asp-controller="ElectionCommissioner" asp-action="Disable">Disable Candidate</button>
+        </div>
+        <br />
+        <br />
+    </form>
+
+    <div class="mb-3">
+        <form method="get">
+            <button type="submit" class="button-84" asp-controller="ElectionCommissioner" asp-action="CandidateVoteInfoLahore">Election Result Lahore</button>
+
+            <button type="submit" class="button-84" asp-controller="ElectionCommissioner" asp-action="CandidateVoteInfoIslamabad">Election Result Islamabad</button>
+
+            <button type="submit" class="button-84" asp-controller="ElectionCommissioner" asp-action="CandidateVoteInfoKarachi">Election Result Karachi</button>
+
+            <button type="submit" class="button-84" asp-controller="ElectionCommissioner" asp-action="CandidateVoteInfoFaislabad">Election Result Faislabad</button>
+        </form>
+    </div>
+
+    <div class="mb-3">
+        <form method="post" asp-controller="ElectionCommissioner" asp-action="Logout">
+            <button type="submit" class="button-84">Logout</button>
+        </form>
+    </div>
+</body>
+</html>

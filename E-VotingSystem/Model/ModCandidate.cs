@@ -15,3 +15,9 @@
 
     public bool IsVote { get; set; }
 }
+
+public class ModCandidateDataset
+{
+    public List<ModCandidate> ListModCandidate { get; set; } = new List<ModCandidate>();
+    public ModMember LoggedInMember { get; set; } = new ModMember();
+}

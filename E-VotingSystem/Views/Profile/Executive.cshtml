@@ -1,103 +1,80 @@
-﻿@using Microsoft.AspNetCore.Hosting
+﻿@using Microsoft.AspNetCore.Mvc;
+@using Microsoft.AspNetCore.Hosting
 
-@model List<ModCandidate>
+@model ModCandidateDataset
 @{
-    List<ModCandidate> l_ListModCandidate_Executive = new List<ModCandidate>();
-    l_ListModCandidate_Executive = @Model;
-
-    ModMember? l_ModLoggedInMember = (ModMember?)TempData["LoggedInMember"];
+    List<ModCandidate> l_ListModCandidate_Executive = Model.ListModCandidate;
+    ModMember l_ModLoggedInMember = Model.LoggedInMember; 
 }
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/StyleSheetmodified.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/images/background.webp" asp-append-version="true" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="~/css/CanidateProfile.css" asp-append-version="true" />
 </head>
 
 <body>
-
     <div class="container mt-4">
-        <h3 class="text-center">Executive Canidates List</h3> 
-        <h4 class="text-center">@l_ListModCandidate_Executive.First().Region Region</h4>
-        <br />
-        @{
-            if (l_ModLoggedInMember != null)
-            {
-                <h4 class="text-center">Please Select Your @l_ModLoggedInMember.ExCouncilSeats Members</h4>
-            }
-        }
-
         @if (TempData["ErrorMessage"] != null)
         {
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>@TempData["ErrorMessage"]!</strong>
+                <strong>@TempData["ErrorMessage"]</strong>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         }
 
-        <div class="row">
-        </div>
+        @if (l_ModLoggedInMember != null)
+        {
+            <div style="font-size: 20px; font-weight: 500; color: #31344b;">            
+                <h1>Select your @l_ModLoggedInMember.ExCouncilSeats executive candidates for @l_ListModCandidate_Executive.First().Region region</h1>.
+            </div>
+        }
     </div>
-
+ 
     <div class="container mt-4">
         <form method="post" asp-controller="Profile" asp-action="CastVoteExecutive">
 
             @if (Model != null)
             {
-                <div class="row card-container">
-                    @for (var i = 0; i < Model.Count; i++)
+                <div class="d-flex flex-wrap">
+                    @for (var i = 0; i < @Model.ListModCandidate.Count; i++)
                     {
-                        var candidate = Model[i];
-                        <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
-                            <div class="card">
+                        var candidate = @Model.ListModCandidate[i];
 
+                        <div>
+                            <div class="wrapper" style="margin:5px">
+                                <div class="img-area">
+                                    <div class="inner-area">
+                                        @if (!string.IsNullOrEmpty(@Model.ListModCandidate[i].Image))
+                                        {
+                                            <img src="~/images/@Model.ListModCandidate[i].Image" alt="Image Description" class="card-img-top">
 
-                              
-
-
-                                <div class="image-container">
-                                    @if (!string.IsNullOrEmpty(@Model[i].Image))
-                                    {
-                                        <img src="~/images/@Model[i].Image" alt="Image Description" class="card-img-top">
-
-                                    }
-                                    else
-                                    {
-                                        <img src="https://as1.ftcdn.net/v2/jpg/02/42/45/90/1000_F_242459076_53ffNaKxcGS1ioScWiSt50e9ltwvynqt.jpg" alt="Image Description" class="card-img-top">
-                                    }
-                                   
-                                </div>
-                                <div class="card-body">
-                                    <h5 class="card-title">@candidate.CandidateID</h5>
-                                    <p class="card-text">
-                                        <strong>Member ID:</strong> @candidate.CandidateID<br>
-                                        <strong>Mobile:</strong> @candidate.Mobile<br>
-                                        <strong>Nominated For:</strong> @candidate.NominatedFor<br>
-                                        <strong>Region:</strong> @candidate.Region                                     
-                                    </p>
-                                </div>
-                                <div class="card-footer text-center">
-                                    <div class="form-check form-check-inline">
-                                        <input type="hidden" asp-for="@Model[i].PKGUID" />
-                                        <input type="hidden" asp-for="@Model[i].CandidateID" />
-                                        <input type="hidden" asp-for="@Model[i].CandidateName" />
-                                        <input type="hidden" asp-for="@Model[i].NominatedFor" />
-                                        <input type="hidden" asp-for="@Model[i].Region" />
-                                        <input type="hidden" asp-for="@Model[i].Email" />
-                                        <input type="hidden" asp-for="@Model[i].ContactNo" />
-                                        <input type="hidden" asp-for="@Model[i].Mobile" />
-                                        <input type="hidden" asp-for="@Model[i].Address" />
-                                        <input type="hidden" asp-for="@Model[i].Image" />
-                                        <input type="checkbox" class="form-check-input" asp-for="@Model[i].IsVote" id="castVote_@Model[i].PKGUID">
-                                        <label class="form-check-label link-button" for="castVote_@Model[i].PKGUID">Cast Vote</label>
+                                        }
+                                        else
+                                        {
+                                            <img src="https://as1.ftcdn.net/v2/jpg/02/42/45/90/1000_F_242459076_53ffNaKxcGS1ioScWiSt50e9ltwvynqt.jpg" alt="Image Description" class="card-img-top">
+                                        }
                                     </div>
+                                </div>
+
+                                <div class="name">
+                                    @candidate.CandidateName
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input type="hidden" asp-for="@Model.ListModCandidate[i].PKGUID" />
+                                    <input type="hidden" asp-for="@Model.ListModCandidate[i].CandidateID" />
+                                    <input type="hidden" asp-for="@Model.ListModCandidate[i].CandidateName" />
+                                    <input type="hidden" asp-for="@Model.ListModCandidate[i].NominatedFor" />
+                                    <input type="hidden" asp-for="@Model.ListModCandidate[i].Region" />
+                                    <input type="hidden" asp-for="@Model.ListModCandidate[i].Email" />
+                                    <input type="hidden" asp-for="@Model.ListModCandidate[i].ContactNo" />
+                                    <input type="hidden" asp-for="@Model.ListModCandidate[i].Mobile" />
+                                    <input type="hidden" asp-for="@Model.ListModCandidate[i].Address" />
+                                    <input type="hidden" asp-for="@Model.ListModCandidate[i].Image" />
+                                    <input type="checkbox" class="form-check-input" asp-for="@Model.ListModCandidate[i].IsVote" id="castVote_@Model.ListModCandidate[i].PKGUID">
+                                    <label class="form-check-label link-button" for="castVote_@Model.ListModCandidate[i].PKGUID">Cast Vote</label>
                                 </div>
                             </div>
                         </div>
@@ -110,11 +87,9 @@
             }
 
             <div class="text-center mt-4">
-                <button type="submit" class="btn btn-success">Submit Executive Votes</button>
+                <button type="submit" class="btn btn-success">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Next &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</button>
             </div>
         </form>
     </div>
-
 </body>
-
 </html>
