@@ -89,7 +89,7 @@ function verifyOTPOfficial() {
         confirmationResult.confirm(otp)
             .then((result) => {
                 console.log("Code verified:", result);
-                window.location.href = "/ElectionOfficials/CandidateVoteInfo";
+                window.location.href = "/ElectionOfficials/Dashboard";
 
             })
             .catch((error) => {

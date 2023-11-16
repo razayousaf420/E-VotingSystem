@@ -53,8 +53,8 @@ public class ElectionOfficials : Controller
                 }
 
                 HttpContext.Session.Set<ModElectionOfficial>("LoggedInElectionOfficial", l_LoggedInElectionOfficial);
-                return RedirectToAction("IndexOfficial", "OTP", l_LoggedInElectionOfficial);             
-                //return RedirectToAction("CandidateVoteInfo");
+                //return RedirectToAction("IndexOfficial", "OTP", l_LoggedInElectionOfficial);             
+                return RedirectToAction("Dashboard", "ElectionOfficials");
             }
         }
         catch (Exception ex)
@@ -65,7 +65,352 @@ public class ElectionOfficials : Controller
         }
     }
 
-   
+    [HttpPost]
+    public ActionResult Logout()
+    {
+        try
+        {
+            HttpContext.Session.Clear();
+            return View("Index");
+        }
+        catch (Exception ex)
+        {
+            new CmConnectionHelper().Vd_WriteToFile(ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+            return View("Index");
+        }
+    }
+
+    [HttpGet]
+    public ActionResult Dashboard()
+    {
+        try
+        {
+            ModElectionOfficial? l_LoggedInModElectionOfficial = HttpContext.Session.Get<ModElectionOfficial>("LoggedInElectionOfficial");
+            if (l_LoggedInModElectionOfficial == null)
+            {
+                return View("Index");
+            }
+
+            return View();
+        }
+        catch (Exception ex)
+        {
+            new CmConnectionHelper().Vd_WriteToFile(ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+            return View("Index");
+        }
+    }
+
+    [HttpPost]
+    public ActionResult CheckStatus(string MemberID)
+    {
+        try
+        {
+            CmConnectionHelper l_CmConnectionHelper = new CmConnectionHelper();
+            string l_ConnectionString = l_CmConnectionHelper.Fnc_GetConnectionString();
+
+            using (SqlConnection l_SqlConnection_Member = new SqlConnection(l_ConnectionString))
+            {
+                l_SqlConnection_Member.Open();
+                SqlCommand l_SqlCommand_Member = new SqlCommand();
+                l_SqlCommand_Member.Connection = l_SqlConnection_Member;
+                l_SqlCommand_Member.Parameters.AddWithValue("@mMemberID", MemberID.Trim());
+                l_SqlCommand_Member.CommandText = " SELECT * FROM Vw_TBU_Member WHERE MemberID = @mMemberID ";
+
+                ModMember l_ModLoggedInMember = new ModMember();
+                SqlDataReader l_SqlDataReader_Member = l_SqlCommand_Member.ExecuteReader();
+                if (l_SqlDataReader_Member.Read() == true)
+                {
+                    l_ModLoggedInMember.PKGUID = (Guid)l_SqlDataReader_Member["PKGUID"];
+                    l_ModLoggedInMember.MemberID = (string)l_SqlDataReader_Member["MemberID"];
+                    l_ModLoggedInMember.Password = (string)l_SqlDataReader_Member["Password"];
+                    l_ModLoggedInMember.MemberName = (string)l_SqlDataReader_Member["MemberName"];
+                    l_ModLoggedInMember.Region = (string)l_SqlDataReader_Member["Region"];
+                    l_ModLoggedInMember.Email = (string)l_SqlDataReader_Member["Email"];
+                    l_ModLoggedInMember.ContactNo = (string)l_SqlDataReader_Member["ContactNo"];
+                    l_ModLoggedInMember.Mobile = (string)l_SqlDataReader_Member["Mobile"];
+                    l_ModLoggedInMember.Address = (string)l_SqlDataReader_Member["Address"];
+                    l_ModLoggedInMember.LcCouncilSeats = (int)l_SqlDataReader_Member["LcCouncilSeats"];
+                    l_ModLoggedInMember.ExCouncilSeats = (int)l_SqlDataReader_Member["ExCouncilSeats"];
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Invalid Member ID";
+                    return View("Dashboard");
+                }
+
+                using (SqlConnection l_SqlConnection_Vote = new SqlConnection(l_ConnectionString))
+                {
+                    l_SqlConnection_Vote.Open();
+                    SqlCommand l_SqlCommand_Vote = new SqlCommand();
+                    l_SqlCommand_Vote.Connection = l_SqlConnection_Vote;
+                    l_SqlCommand_Vote.Parameters.AddWithValue("@mMemberDID", l_ModLoggedInMember.PKGUID);
+                    l_SqlCommand_Vote.CommandText = " SELECT COUNT(*) AS VoteCount FROM TBU_Vote WHERE MemberDID = @mMemberDID; ";
+
+                    object l_Result = l_SqlCommand_Vote.ExecuteScalar();
+                    if (l_Result == DBNull.Value)
+                    {
+                        TempData["ErrorMessage"] = "Error in fetching casted vote count from database";
+                        return View("Dashboard");
+                    }
+
+                    int l_TotalVoteCount = l_ModLoggedInMember.LcCouncilSeats + l_ModLoggedInMember.ExCouncilSeats;
+                    int l_VoteCount = (int)l_Result;
+
+                    if (l_VoteCount > 0)
+                    {
+                        TempData["ErrorMessage"] = $"{l_ModLoggedInMember.MemberName} has already casted {l_VoteCount} out of {l_TotalVoteCount} votes.";
+                        return View("Dashboard");
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = $"No votes casted by {l_ModLoggedInMember.MemberName}.";
+                        return View("Dashboard");
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            new CmConnectionHelper().Vd_WriteToFile(ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+            return View("Dashboard");
+        }
+    }
+
+    [HttpPost]
+    public ActionResult Enable(string MemberID)
+    {
+        try
+        {
+            CmConnectionHelper l_CmConnectionHelper = new CmConnectionHelper();
+            string l_ConnectionString = l_CmConnectionHelper.Fnc_GetConnectionString();
+
+            ModMember l_ModLoggedInMember = new ModMember();
+            using (SqlConnection l_SqlConnection_Member = new SqlConnection(l_ConnectionString))
+            {
+                l_SqlConnection_Member.Open();
+                SqlCommand l_SqlCommand_Member = new SqlCommand();
+                l_SqlCommand_Member.Connection = l_SqlConnection_Member;
+                l_SqlCommand_Member.Parameters.AddWithValue("@mMemberID", MemberID.Trim());
+                l_SqlCommand_Member.CommandText = " SELECT * FROM Vw_TBU_Member WHERE MemberID = @mMemberID ";
+
+                SqlDataReader l_SqlDataReader_Member = l_SqlCommand_Member.ExecuteReader();
+                if (l_SqlDataReader_Member.Read() == true)
+                {
+                    l_ModLoggedInMember.PKGUID = (Guid)l_SqlDataReader_Member["PKGUID"];
+                    l_ModLoggedInMember.MemberID = (string)l_SqlDataReader_Member["MemberID"];
+                    l_ModLoggedInMember.Password = (string)l_SqlDataReader_Member["Password"];
+                    l_ModLoggedInMember.MemberName = (string)l_SqlDataReader_Member["MemberName"];
+                    l_ModLoggedInMember.Region = (string)l_SqlDataReader_Member["Region"];
+                    l_ModLoggedInMember.Email = (string)l_SqlDataReader_Member["Email"];
+                    l_ModLoggedInMember.ContactNo = (string)l_SqlDataReader_Member["ContactNo"];
+                    l_ModLoggedInMember.Mobile = (string)l_SqlDataReader_Member["Mobile"];
+                    l_ModLoggedInMember.Address = (string)l_SqlDataReader_Member["Address"];
+                    l_ModLoggedInMember.LcCouncilSeats = (int)l_SqlDataReader_Member["LcCouncilSeats"];
+                    l_ModLoggedInMember.ExCouncilSeats = (int)l_SqlDataReader_Member["ExCouncilSeats"];
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Invalid Member ID";
+                    return View("Dashboard");
+                }
+            }
+
+            using (SqlConnection l_SqlConnection_Vote = new SqlConnection(l_ConnectionString))
+            {
+                l_SqlConnection_Vote.Open();
+                SqlCommand l_SqlCommand_Vote = new SqlCommand();
+                l_SqlCommand_Vote.Connection = l_SqlConnection_Vote;
+                l_SqlCommand_Vote.Parameters.AddWithValue("@mMemberDID", l_ModLoggedInMember.PKGUID);
+                l_SqlCommand_Vote.CommandText = " SELECT COUNT(*) AS VoteCount FROM TBU_Vote WHERE MemberDID = @mMemberDID; ";
+
+                object l_Result = l_SqlCommand_Vote.ExecuteScalar();
+                if (l_Result == DBNull.Value)
+                {
+                    TempData["ErrorMessage"] = "Error in fetching casted vote count from database";
+                    return View("Dashboard");
+                }
+
+                int l_TotalVoteCount = l_ModLoggedInMember.LcCouncilSeats + l_ModLoggedInMember.ExCouncilSeats;
+                int l_VoteCount = (int)l_Result;
+
+                if (l_VoteCount > 0)
+                {
+                    TempData["ErrorMessage"] = $"{l_ModLoggedInMember.MemberName} has already casted {l_VoteCount} votes. You cannot enable him.";
+                    return View("Dashboard");
+                }
+            }
+
+            using (SqlConnection l_SqlConnection = new SqlConnection(l_ConnectionString))
+            {
+                l_SqlConnection.Open();
+                SqlCommand l_SqlCommand = new SqlCommand();
+                l_SqlCommand.Connection = l_SqlConnection;
+                l_SqlCommand.Parameters.AddWithValue("@mMemberID", MemberID.Trim());
+                l_SqlCommand.CommandText = " UPDATE TBU_Member SET IsEnabled = 1 WHERE MemberID = @mMemberID ";
+
+                l_SqlCommand.ExecuteNonQuery();
+            }
+
+            TempData["ErrorMessage"] = "Member has been enabled.";
+            return View("Dashboard");
+        }
+
+        catch (Exception ex)
+        {
+            new CmConnectionHelper().Vd_WriteToFile(ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+            return View("Dashboard");
+        }
+    }
+
+    [HttpPost]
+    public ActionResult Disable(string MemberID)
+    {
+        try
+        {
+            CmConnectionHelper l_CmConnectionHelper = new CmConnectionHelper();
+            string l_ConnectionString = l_CmConnectionHelper.Fnc_GetConnectionString();
+
+            ModMember l_ModLoggedInMember = new ModMember();
+            using (SqlConnection l_SqlConnection_Member = new SqlConnection(l_ConnectionString))
+            {
+                l_SqlConnection_Member.Open();
+                SqlCommand l_SqlCommand_Member = new SqlCommand();
+                l_SqlCommand_Member.Connection = l_SqlConnection_Member;
+                l_SqlCommand_Member.Parameters.AddWithValue("@mMemberID", MemberID.Trim());
+                l_SqlCommand_Member.CommandText = " SELECT * FROM Vw_TBU_Member WHERE MemberID = @mMemberID ";
+
+                SqlDataReader l_SqlDataReader_Member = l_SqlCommand_Member.ExecuteReader();
+                if (l_SqlDataReader_Member.Read() == true)
+                {
+                    l_ModLoggedInMember.PKGUID = (Guid)l_SqlDataReader_Member["PKGUID"];
+                    l_ModLoggedInMember.MemberID = (string)l_SqlDataReader_Member["MemberID"];
+                    l_ModLoggedInMember.Password = (string)l_SqlDataReader_Member["Password"];
+                    l_ModLoggedInMember.MemberName = (string)l_SqlDataReader_Member["MemberName"];
+                    l_ModLoggedInMember.Region = (string)l_SqlDataReader_Member["Region"];
+                    l_ModLoggedInMember.Email = (string)l_SqlDataReader_Member["Email"];
+                    l_ModLoggedInMember.ContactNo = (string)l_SqlDataReader_Member["ContactNo"];
+                    l_ModLoggedInMember.Mobile = (string)l_SqlDataReader_Member["Mobile"];
+                    l_ModLoggedInMember.Address = (string)l_SqlDataReader_Member["Address"];
+                    l_ModLoggedInMember.LcCouncilSeats = (int)l_SqlDataReader_Member["LcCouncilSeats"];
+                    l_ModLoggedInMember.ExCouncilSeats = (int)l_SqlDataReader_Member["ExCouncilSeats"];
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Invalid Member ID";
+                    return View("Dashboard");
+                }
+            }
+
+            using (SqlConnection l_SqlConnection_Vote = new SqlConnection(l_ConnectionString))
+            {
+                l_SqlConnection_Vote.Open();
+                SqlCommand l_SqlCommand_Vote = new SqlCommand();
+                l_SqlCommand_Vote.Connection = l_SqlConnection_Vote;
+                l_SqlCommand_Vote.Parameters.AddWithValue("@mMemberDID", l_ModLoggedInMember.PKGUID);
+                l_SqlCommand_Vote.CommandText = " SELECT COUNT(*) AS VoteCount FROM TBU_Vote WHERE MemberDID = @mMemberDID; ";
+
+                object l_Result = l_SqlCommand_Vote.ExecuteScalar();
+                if (l_Result == DBNull.Value)
+                {
+                    TempData["ErrorMessage"] = "Error in fetching casted vote count from database";
+                    return View("Dashboard");
+                }
+
+                int l_TotalVoteCount = l_ModLoggedInMember.LcCouncilSeats + l_ModLoggedInMember.ExCouncilSeats;
+                int l_VoteCount = (int)l_Result;
+
+                if (l_VoteCount > 0)
+                {
+                    TempData["ErrorMessage"] = $"{l_ModLoggedInMember.MemberName} has already casted {l_VoteCount} votes. You cannot disable him.";
+                    return View("Dashboard");
+                }
+            }
+
+            using (SqlConnection l_SqlConnection = new SqlConnection(l_ConnectionString))
+            {
+                l_SqlConnection.Open();
+                SqlCommand l_SqlCommand = new SqlCommand();
+                l_SqlCommand.Connection = l_SqlConnection;
+                l_SqlCommand.Parameters.AddWithValue("@mMemberID", MemberID.Trim());
+                l_SqlCommand.CommandText = " UPDATE TBU_Member SET IsEnabled = 0 WHERE MemberID = @mMemberID ";
+
+                l_SqlCommand.ExecuteNonQuery();
+            }
+
+            TempData["ErrorMessage"] = "Member has been disabled.";
+            return View("Dashboard");
+        }
+        catch (Exception ex)
+        {
+            new CmConnectionHelper().Vd_WriteToFile(ex.Message);
+            TempData["ErrorMessage"] = ex.Message;
+            return View("Dashboard");
+        }
+    }
+
+    [HttpGet]
+    public ActionResult UpdatePassword()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public ActionResult Password(string l_NewPassword, string l_ConfirmPassword = "")
+    {
+        if (l_NewPassword != l_ConfirmPassword)
+        {
+            TempData["ErrorMessage"] = $"The new password and confirmed password field should be the same.";
+            return View("UpdatePassword");
+        }
+
+        ModElectionOfficial? l_ModLoggedInElectionOfficial = HttpContext.Session.Get<ModElectionOfficial>("LoggedInElectionOfficial");
+        if (l_ModLoggedInElectionOfficial == null)
+        {
+            return RedirectToAction("Index", "ElectionOfficials");
+        }
+
+        CmConnectionHelper l_CmConnectionHelper = new CmConnectionHelper();
+        string l_ConnectionString = l_CmConnectionHelper.Fnc_GetConnectionString();
+
+        using (SqlConnection l_SqlConnection = new SqlConnection(l_ConnectionString))
+        {
+            l_SqlConnection.Open();
+            SqlCommand l_SqlCommand = new SqlCommand();
+            l_SqlCommand.Connection = l_SqlConnection;
+            l_SqlCommand.CommandText = $" UPDATE TBU_ElectionOfficial SET Password = '{l_NewPassword}' WHERE PKGUID = '{l_ModLoggedInElectionOfficial.PKGUID}' ; ";
+
+            object l_Result = l_SqlCommand.ExecuteScalar();
+            if (l_Result == DBNull.Value)
+            {
+                TempData["ErrorMessage"] = "Error in updating password.";
+                return View("Index");
+            }
+        }
+
+        HttpContext.Session.Clear();
+        return RedirectToAction("Index", "ElectionOfficials");
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     //OK
     [HttpGet]
     public ActionResult CandidateVoteInfo()

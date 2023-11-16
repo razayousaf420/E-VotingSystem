@@ -20,6 +20,51 @@ public class ProfileController : Controller
     }
 
     [HttpGet]
+    public ActionResult UpdatePassword()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public ActionResult Password(string l_NewPassword, string l_ConfirmPassword = "")
+    {     
+        if (l_NewPassword != l_ConfirmPassword)
+        {
+            TempData["ErrorMessage"] = $"The new password and confirmed password field should be the same.";      
+            return View("UpdatePassword");
+        }
+
+        ModMember? l_ModLoggedInMember = HttpContext.Session.Get<ModMember>("LoggedInMember");
+        if (l_ModLoggedInMember == null)
+        {
+            return RedirectToAction("Index", "Account");
+        }
+
+        CmConnectionHelper l_CmConnectionHelper = new CmConnectionHelper();
+        string l_ConnectionString = l_CmConnectionHelper.Fnc_GetConnectionString();
+
+        using (SqlConnection l_SqlConnection = new SqlConnection(l_ConnectionString))
+        {
+            l_SqlConnection.Open();
+            SqlCommand l_SqlCommand = new SqlCommand();
+            l_SqlCommand.Connection = l_SqlConnection;
+            l_SqlCommand.CommandText = $" UPDATE TBU_Member SET Password = '{l_NewPassword}' WHERE PKGUID = '{l_ModLoggedInMember.PKGUID}' ; ";
+
+            object l_Result = l_SqlCommand.ExecuteScalar();
+            if (l_Result == DBNull.Value)
+            {
+                TempData["ErrorMessage"] = "Error in updating password.";
+                return View("Index");
+            }          
+        }
+
+        HttpContext.Session.Clear();
+        return RedirectToAction("Index" ,"Account");
+    }
+
+
+
+    [HttpGet]
     public ActionResult Local()
     {
         try
@@ -99,7 +144,6 @@ public class ProfileController : Controller
             return View("Index");
         }
     }
-
     [HttpPost]
     public ActionResult CastVoteLocal(ModCandidateDataset l_ModCandidateDataset)
     {
@@ -142,7 +186,6 @@ public class ProfileController : Controller
             return View("Index");
         }
     }
-
     [HttpPost]
     public ActionResult ConfirmationLocal(List<ModCandidate> l_ListModCandidate_Local)
     {
@@ -304,7 +347,6 @@ public class ProfileController : Controller
             return View("Index");
         }
     }
-
     [HttpPost]
     public ActionResult CastVoteExecutive(ModCandidateDataset l_ModCandidateDataset)
     {
@@ -347,7 +389,6 @@ public class ProfileController : Controller
             return View("Index");
         }
     }
-
     [HttpPost]
     public ActionResult ConfirmationExecutive(List<ModCandidate> l_ListModCandidate_Executive)
     {

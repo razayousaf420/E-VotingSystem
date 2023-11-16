@@ -82,8 +82,8 @@ public class AccountController : Controller
                     }
 
                     HttpContext.Session.Set<ModMember>("LoggedInMember", l_ModLoggedInMember);
-                    return RedirectToAction("Index", "OTP", l_ModLoggedInMember);
-                    //return RedirectToAction("Index", "Profile");
+                    //return RedirectToAction("Index", "OTP", l_ModLoggedInMember);
+                    return RedirectToAction("Index", "Profile");
                 }
             }
         }

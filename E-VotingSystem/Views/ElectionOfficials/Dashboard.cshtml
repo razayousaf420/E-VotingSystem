@@ -66,28 +66,34 @@
         }
     </div>
 
-    <h1>Election Commisioner Dashboard</h1>
+    <h1>Election Official Dashboard</h1>
+
+    <form method="post">
+        <div class="mb-3">
+            <label class="form-label" style="float: left; font-weight: bold;">Member ID : </label>
+            <input class="form-control" type="text" name="MemberID" placeholder="Enter Member ID" required="" />
+        </div>
+
+        <div class="mb-3">
+            <button class="button-84" type="submit" asp-controller="ElectionOfficials" asp-action="CheckStatus">Check Vote Status</button>
+
+            <button class="button-84" type="submit" asp-controller="ElectionOfficials" asp-action="Enable">Enable Candidate</button>
+
+            <button class="button-84" type="submit" asp-controller="ElectionOfficials" asp-action="Disable">Disable Candidate</button>
+        </div>
+        <br />
+        <br />
+    </form>
 
     <div class="mb-3">
         <form method="get">
-            <button type="submit" class="button-84" asp-controller="ElectionCommissioner" asp-action="CandidateVoteInfoLahore">Election Result Lahore</button>
-
-            <button type="submit" class="button-84" asp-controller="ElectionCommissioner" asp-action="CandidateVoteInfoIslamabad">Election Result Islamabad</button>
-
-            <button type="submit" class="button-84" asp-controller="ElectionCommissioner" asp-action="CandidateVoteInfoKarachi">Election Result Karachi</button>
-
-            <button type="submit" class="button-84" asp-controller="ElectionCommissioner" asp-action="CandidateVoteInfoFaislabad">Election Result Faislabad</button>
-        </form>   
-    </div>
-
-    <div class="mb-3">
-        <form method="get">
-            <button type="submit" class="button-84" asp-controller="ElectionCommissioner" asp-action="UpdatePassword">Update Password</button>
+            <button type="submit" class="button-84" asp-controller="ElectionOfficials" asp-action="UpdatePassword">Update Password</button>
+            <button type="submit" class="button-84" asp-controller="ElectionOfficials" asp-action="CandidateVoteInfo">Election Result</button>
         </form>
     </div>
 
     <div class="mb-3">
-        <form method="post" asp-controller="ElectionCommissioner" asp-action="Logout">
+        <form method="post" asp-controller="ElectionOfficials" asp-action="Logout">
             <button type="submit" class="button-84">Logout</button>
         </form>
     </div>
