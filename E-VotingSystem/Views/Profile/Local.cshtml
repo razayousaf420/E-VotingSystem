@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="~/css/CanidateProfile.css" asp-append-version="true" />
 </head>
 
-<body>
+<body style="background: #ecf0f3;">
     <div class="container mt-4">
         @if (TempData["ErrorMessage"] != null)
         {
@@ -27,16 +27,19 @@
 
         @if (l_ModLoggedInMember != null)
         {
-            <div style="font-size: 20px; font-weight: 500; color: #31344b;">
-                <h1>Select your @l_ModLoggedInMember.LcCouncilSeats local candidates for @l_ListModCandidate_Local.First().Region region</h1>
-            </div>
+            @if (Model.ListModCandidate != null && Model.ListModCandidate.Count != 0)
+            {
+                <div style="font-size: 20px; font-weight: 500; color: #31344b;">
+                    <h1>Select your @l_ModLoggedInMember.LcCouncilSeats local candidates for @l_ListModCandidate_Local.First().Region region</h1>
+                </div>
+            }
         }
     </div>
 
     <div class="container mt-4">
         <form method="post" asp-controller="Profile" asp-action="CastVoteLocal">
 
-            @if (Model != null)
+            @if (Model.ListModCandidate != null && Model.ListModCandidate.Count != 0)
             {
                 <div class="d-flex flex-wrap">
                     @for (var i = 0; i < Model.ListModCandidate.Count; i++)

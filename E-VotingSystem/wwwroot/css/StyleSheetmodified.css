@@ -7374,10 +7374,10 @@ textarea.form-control-lg {
     background-color: RGBA(var(--bs-light-rgb), var(--bs-bg-opacity, 1)) !important;
 }
 
-.text-bg-dark {
+/*.text-bg-dark {
     color: #fff !important;
     background-color: RGBA(var(--bs-dark-rgb), var(--bs-bg-opacity, 1)) !important;
-}
+}*/
 
 .link-primary {
     color: RGBA(var(--bs-primary-rgb), var(--bs-link-opacity, 1)) !important;
@@ -8675,10 +8675,10 @@ textarea.form-control-lg {
     padding-bottom: 0.5rem !important;
 }
 
-.py-3 {
+/*.py-3 {
     padding-top: 1rem !important;
     padding-bottom: 1rem !important;
-}
+}*/
 
 .py-4 {
     padding-top: 1.5rem !important;
@@ -8952,9 +8952,9 @@ textarea.form-control-lg {
     text-align: right !important;
 }
 
-.text-center {
+/*.text-center {
     text-align: center !important;
-}
+}*/
 
 .text-decoration-none {
     text-decoration: none !important;
@@ -9040,10 +9040,10 @@ textarea.form-control-lg {
     color: rgba(var(--bs-black-rgb), var(--bs-text-opacity)) !important;
 }
 
-.text-white {
+/*.text-white {
     --bs-text-opacity: 1;
     color: rgba(var(--bs-white-rgb), var(--bs-text-opacity)) !important;
-}
+}*/
 
 .text-body {
     --bs-text-opacity: 1;

@@ -202,8 +202,7 @@ img {
 
 body {
     font-family: 'Source Sans Pro', sans-serif;
-    font-size: 100%;
-    background: url(/images/background.webp) no-repeat center;
+    font-size: 100%; 
     background-size: cover;
     -webkit-background-size: cover;
     -moz-background-size: cover;

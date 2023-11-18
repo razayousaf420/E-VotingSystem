@@ -11,9 +11,5 @@
     public string? Address { get; set; }    
     public int ExCouncilSeats { get; set; }    
     public int LcCouncilSeats { get; set; }    
-    public bool IsEnabled { get; set; }
-
-    //UI
-    public bool IsVotesCastedExecutive { get; set; }
-    public bool IsVotesCastedLocal { get; set; }
+    public bool IsEnabled { get; set; }  
 }

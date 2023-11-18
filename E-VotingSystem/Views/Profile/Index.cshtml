@@ -53,17 +53,22 @@
 
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/font-awesome.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/images/bg.jpg" asp-append-version="true" />
-
+    
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+  @*   <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" /> *@
     <link rel="stylesheet" href="~/css/StyleSheetmodified.css" asp-append-version="true" />
-
 </head>
 <body style="background: #ecf0f3;">
-    <br />
-    <br />
-    <br />
+    <div class="container mt-5">
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert" style="text-align:center">
+                <strong>@TempData["ErrorMessage"]</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+    </div>
+
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-lg-6">
@@ -106,7 +111,7 @@
 
                             <div class="text-center">
                                 <div>
-                                    <form method="get" >
+                                    <form method="get">
                                         <button asp-controller="Profile" asp-action="UpdatePassword" class="button-84" type="submit">&nbsp; Update Password &nbsp;</button>
                                     </form>
                                 </div>

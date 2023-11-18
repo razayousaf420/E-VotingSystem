@@ -60,7 +60,6 @@
                 <form class="rounded bg-white shadow p-5">
                     <h3 class="text-dark fw-bolder fs-4 mb-4">TWO STEP VERIFICATION</h3>
 
-
                     <div style="
                         text-align: center;
                         margin: 0em auto;
@@ -77,9 +76,7 @@
                         <label for="verification-code" class="text-dark fw-bolder fs-4 mb-4">MEMBER MOBILE</label>
                         <input type="text" id="number" class="form-control placeholder-input" placeholder="+923---------" value="@Model.Mobile" readonly>
 
-
                         <div id="recaptcha-container" class="d-flex justify-content-center align-items-center mt-4"></div>
-
 
                         <button type="button" onclick="phoneAuth()" class="btn btn-primary submit_btn my-4" style="background:black">SEND OTP</button>
                     </div>
@@ -87,12 +84,21 @@
                     <div class="otp_input text-start mb-4">
                         <label for="digit">TYPE YOUR 6 DIGIT SECURITY CODE</label>
                         <div class="d-flex align-items-center justify-content-between mt-2">
-                            <input type="text" class="form-control1" placeholder="" maxlength="1">
+
+                            <input type="text" class="form-control1" placeholder="" maxlength="1" oninput="moveFocusToNext(event, this)">
+                            <input type="text" class="form-control2" placeholder="" maxlength="1" oninput="moveFocusToNext(event, this)">
+                            <input type="text" class="form-control3" placeholder="" maxlength="1" oninput="moveFocusToNext(event, this)">
+                            <input type="text" class="form-control4" placeholder="" maxlength="1" oninput="moveFocusToNext(event, this)">
+                            <input type="text" class="form-control5" placeholder="" maxlength="1" oninput="moveFocusToNext(event, this)">
+                            <input type="text" class="form-control6" placeholder="" maxlength="1" oninput="moveFocusToNext(event, this)">
+
+                           @*  <input type="text" class="form-control1" placeholder="" maxlength="1">
                             <input type="text" class="form-control2" placeholder="" maxlength="1">
                             <input type="text" class="form-control3" placeholder="" maxlength="1">
                             <input type="text" class="form-control4" placeholder="" maxlength="1">
                             <input type="text" class="form-control5" placeholder="" maxlength="1">
-                            <input type="text" class="form-control6" placeholder="" maxlength="1">
+                            <input type="text" class="form-control6" placeholder="" maxlength="1"> *@
+                       
                         </div>
                     </div>
                     <button type="button" onclick="verifyOTPMember()" class="btn btn-primary submit_btn my-4" style="background:black">VERIFY</button>
@@ -101,6 +107,16 @@
         </div>
     </section>
 
+    <script>
+        function moveFocusToNext(event, currentInput) {
+            if (currentInput.value.length === currentInput.maxLength) {
+                const nextInput = currentInput.nextElementSibling;
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }
+        }
+    </script>
 
 </body>
 </html>

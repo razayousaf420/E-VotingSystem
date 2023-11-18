@@ -184,6 +184,12 @@ public class ElectionOfficials : Controller
     {
         try
         {
+            ModElectionOfficial? l_LoggedInModElectionOfficial = HttpContext.Session.Get<ModElectionOfficial>("LoggedInElectionOfficial");
+            if (l_LoggedInModElectionOfficial == null)
+            {
+                return View("Index");
+            }
+
             CmConnectionHelper l_CmConnectionHelper = new CmConnectionHelper();
             string l_ConnectionString = l_CmConnectionHelper.Fnc_GetConnectionString();
 
@@ -214,6 +220,12 @@ public class ElectionOfficials : Controller
                 else
                 {
                     TempData["ErrorMessage"] = "Invalid Member ID";
+                    return View("Dashboard");
+                }
+
+                if (l_LoggedInModElectionOfficial.Region?.ToUpper() != l_ModLoggedInMember.Region.ToUpper())
+                {
+                    TempData["ErrorMessage"] = "You cannot enable member of another region.";
                     return View("Dashboard");
                 }
             }
@@ -271,6 +283,12 @@ public class ElectionOfficials : Controller
     {
         try
         {
+            ModElectionOfficial? l_LoggedInModElectionOfficial = HttpContext.Session.Get<ModElectionOfficial>("LoggedInElectionOfficial");
+            if (l_LoggedInModElectionOfficial == null)
+            {
+                return View("Index");
+            }
+
             CmConnectionHelper l_CmConnectionHelper = new CmConnectionHelper();
             string l_ConnectionString = l_CmConnectionHelper.Fnc_GetConnectionString();
 
@@ -301,6 +319,12 @@ public class ElectionOfficials : Controller
                 else
                 {
                     TempData["ErrorMessage"] = "Invalid Member ID";
+                    return View("Dashboard");
+                }
+
+                if (l_LoggedInModElectionOfficial.Region?.ToUpper() != l_ModLoggedInMember.Region.ToUpper())
+                {
+                    TempData["ErrorMessage"] = "You cannot enable member of another region.";
                     return View("Dashboard");
                 }
             }
