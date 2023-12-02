@@ -53,8 +53,8 @@ public class ElectionCommissionerController : Controller
                 }
 
                 HttpContext.Session.Set<ModElectionCommissioner>("LoggedInElectionCommissioner", l_LoggedInElectionCommissioner);
-                //return RedirectToAction("IndexCommissioner", "OTP", l_LoggedInElectionCommissioner);
-                return RedirectToAction("Dashboard", "ElectionCommissioner");
+                return RedirectToAction("IndexCommissioner", "OTP", l_LoggedInElectionCommissioner);
+                //return RedirectToAction("Dashboard", "ElectionCommissioner");
             }
         }
         catch (Exception ex)

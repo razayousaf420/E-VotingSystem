@@ -53,8 +53,8 @@ public class ElectionOfficials : Controller
                 }
 
                 HttpContext.Session.Set<ModElectionOfficial>("LoggedInElectionOfficial", l_LoggedInElectionOfficial);
-                //return RedirectToAction("IndexOfficial", "OTP", l_LoggedInElectionOfficial);             
-                return RedirectToAction("Dashboard", "ElectionOfficials");
+                return RedirectToAction("IndexOfficial", "OTP", l_LoggedInElectionOfficial);             
+                //return RedirectToAction("Dashboard", "ElectionOfficials");
             }
         }
         catch (Exception ex)
